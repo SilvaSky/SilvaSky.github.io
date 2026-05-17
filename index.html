@@ -3,210 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ MC RARE ID TRACKER</title>
-    <!-- Tailwind CSS & FontAwesome for Premium Design -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <title>HTML5 クラフトゲーム</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
-        body {
-            font-family: 'Space Grotesk', sans-serif;
-            background-color: #0b0f19;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background: #87CEEB; font-family: sans-serif; }
+
+        /* 3Dカメラの視点コンテナ */
+        #screen {
+            width: 100%;
+            height: 100%;
+            perspective: 600px;
+            overflow: hidden;
+            position: relative;
         }
-        .mono { font-family: 'JetBrains Mono', monospace; }
-        .gradient-bg {
-            background: linear-gradient(135deg, #0f172a 0%, #0b0f19 100%);
+
+        /* 3Dの世界（カメラの動きに合わせて回転・移動） */
+        #world {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-style: preserve-3d;
+            transform: translate3d(0, 100px, -400px) rotateX(-25deg) rotateY(45deg);
         }
-        .neon-border {
-            box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
-            border: 1px solid rgba(6, 182, 212, 0.2);
+
+        /* ブロックの基本定義 */
+        .cube {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            transform-style: preserve-3d;
         }
-        .neon-text-cyan {
-            text-shadow: 0 0 8px rgba(6, 182, 212, 0.5);
+
+        /* 立方体の6面 */
+        .face {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(0,0,0,0.15);
+            image-rendering: pixelated;
         }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0b0f19; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+
+        /* 各面の配置と偽擬似陰影用の色調整 */
+        .front  { transform: rotateY(  0deg) translateZ(20px); background: #557a2b; }
+        .back   { transform: rotateY(180deg) translateZ(20px); background: #4d6e27; }
+        .left   { transform: rotateY(-90deg) translateZ(20px); background: #456323; }
+        .right  { transform: rotateY( 90deg) translateZ(20px); background: #456323; }
+        .top    { transform: rotateX( 90deg) translateZ(20px); background: #71a03c; }
+        .bottom { transform: rotateX(-90deg) translateZ(20px); background: #2c3e16; }
+
+        /* 土ブロック（下層用） */
+        .dirt .front  { background: #866043; }
+        .dirt .back   { background: #735239; }
+        .dirt .left   { background: #674933; }
+        .dirt .right  { background: #674933; }
+        .dirt .top    { background: #866043; }
+        .dirt .bottom { background: #4d3626; }
+
+        /* 操作UI表示 */
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            pointer-events: none;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .block-select {
+            margin-top: 10px;
+            font-weight: bold;
+        }
     </style>
 </head>
-<body class="text-slate-200 min-h-screen gradient-bg selection:bg-cyan-500 selection:text-slate-900">
+<body>
 
-    <!-- Header / Navbar -->
-    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="bg-cyan-500 text-slate-950 p-2 rounded-lg font-bold tracking-wider text-sm animate-pulse">
-                    <i class="fa-solid fa-bolt"></i> DROP
-                </div>
-                <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-                    3NAME <span class="text-cyan-400 font-light">CLONE</span>
-                </span>
-            </div>
-            <div class="flex items-center space-x-4 text-sm text-slate-400">
-                <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-ping"></span> Live Tracking</span>
-            </div>
+    <div id="ui">
+        <h3>HTML マイクラ風ミニゲーム</h3>
+        <p>視点回転: 画面をドラッグ</p>
+        <p>ブロック破壊: ブロックをクリック</p>
+        <p>ブロック設置: Shift + クリック</p>
+        <div class="block-select">
+            設置タイプ: <span id="current-block">草ブロック</span> (Spaceキーで切替)
         </div>
-    </header>
-
-    <!-- Main Content Container -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        
-        <!-- Dashboard Stats & Filter Info -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 backdrop-blur-sm">
-                <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Target Filters</p>
-                <p class="text-xl font-bold text-cyan-400 neon-text-cyan">NameMC Searches ≥ 80</p>
-            </div>
-            <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 backdrop-blur-sm">
-                <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Total Rare Drops</p>
-                <p class="text-2xl font-bold text-white mono" id="total-count">0</p>
-            </div>
-            <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 backdrop-blur-sm flex items-center justify-between">
-                <div>
-                    <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Search & Filter</p>
-                    <input type="text" id="search-bar" placeholder="IDを検索..." class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-cyan-500 text-slate-200 w-full transition-all">
-                </div>
-                <i class="fa-solid fa-magnifying-glass text-slate-500 text-xl ml-2"></i>
-            </div>
-        </div>
-
-        <!-- Table Section -->
-        <div class="bg-slate-900/40 rounded-2xl border border-slate-800/80 overflow-hidden backdrop-blur-sm neon-border">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-slate-800 bg-slate-950/80 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                            <th class="py-4 px-6">Minecraft ID</th>
-                            <th class="py-4 px-6 text-center">NameMC Searches</th>
-                            <th class="py-4 px-6">Drop Time (JST)</th>
-                            <th class="py-4 px-6 text-right">Time Remaining</th>
-                            <th class="py-4 px-6 text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="drop-table-body" class="divide-y divide-slate-800/60 text-sm">
-                        <!-- JSでここに動的に行が挿入されます -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
-
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 border border-cyan-500/50 text-cyan-400 px-4 py-3 rounded-xl opacity-0 pointer-events-none transition-all duration-300 flex items-center space-x-2 shadow-lg shadow-cyan-500/5">
-        <i class="fa-solid fa-circle-check"></i>
-        <span id="toast-msg">コピーしました</span>
     </div>
 
-    <!-- Logic Script -->
+    <div id="screen">
+        <div id="world"></div>
+    </div>
+
     <script>
-        // 本番環境を想定したモックデータ（NameMCで検索数が80以上の激レアIDリスト）
-        // ※ 実際の運用時はここをバックエンドAPI等からfetchするように書き換えます。
-        const now = Date.now();
-        const mockDrops = [
-            { id: "xqt", searches: 412, dropTime: now + 45000 },      // 45秒後
-            { id: "k7w", searches: 189, dropTime: now + 120000 },     // 2分後
-            { id: "z_0", searches: 95,  dropTime: now + 340000 },     // 5分40秒後
-            { id: "void", searches: 1250, dropTime: now + 720000 },   // 12分後
-            { id: "luna", searches: 840, dropTime: now + 1500000 },   // 25分後
-            { id: "7z9", searches: 82,  dropTime: now + 3600000 },    // 1時間後
-            { id: "vpx", searches: 110, dropTime: now + 7200000 },    // 2時間後
-            // 検索数80未満のデータ（自動で除外されるかテスト用）
-            { id: "test1234", searches: 12, dropTime: now + 5000 } 
-        ];
+        const world = document.getElementById('world');
+        const currentBlockTxt = document.getElementById('current-block');
+        
+        // ゲーム設定
+        const BLOCK_SIZE = 40;
+        const WORLD_SIZE = 8; // 8x8のエリア
+        let blockType = 'grass'; // 'grass' または 'dirt'
 
-        // 検索数80以上のデータのみに最初からフィルタリング
-        let targetDrops = mockDrops.filter(item => item.searches >= 80);
+        // カメラ（視点）の状態
+        let rotX = -25;
+        let rotY = 45;
+        let panX = 0;
+        let panZ = -400;
 
-        function updateTable() {
-            const tbody = document.getElementById('drop-table-body');
-            const searchQuery = document.getElementById('search-bar').value.toLowerCase();
-            const currentTime = Date.now();
-            
-            // 検索バーのフィルター適用
-            const filteredData = targetDrops.filter(item => item.id.toLowerCase().includes(searchQuery));
-            
-            // トータルカウント更新
-            document.getElementById('total-count').innerText = filteredData.length;
+        // マウスドラッグによる視点変更の処理
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
 
-            // 時間順にソート
-            filteredData.sort((a, b) => a.dropTime - b.dropTime);
+        window.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('face')) return; // ブロッククリック時は回転させない
+            isDragging = true;
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        });
 
-            tbody.innerHTML = '';
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const deltaX = e.clientX - previousMousePosition.x;
+            const deltaY = e.clientY - previousMousePosition.y;
 
-            if(filteredData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-slate-500">条件に一致するレアIDが見つかりません</td></tr>`;
-                return;
+            rotY += deltaX * 0.5;
+            rotX = Math.max(-75, Math.min(15, rotX - deltaY * 0.5)); // 画面がひっくり返らないよう制限
+
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+            updateCamera();
+        });
+
+        window.addEventListener('mouseup', () => isDragging = false);
+
+        // キーボード操作（Spaceでブロック切り替え）
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                blockType = blockType === 'grass' ? 'dirt' : 'grass';
+                currentBlockTxt.innerText = blockType === 'grass' ? '草ブロック' : '土ブロック';
             }
+        });
 
-            filteredData.forEach(item => {
-                const timeLeft = item.dropTime - currentTime;
-                
-                let timeStr = "";
-                let rowStatusClass = "";
+        // カメラの座標更新
+        function updateCamera() {
+            world.style.transform = `translate3d(${panX}px, 100px, ${panZ}px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+        }
 
-                if (timeLeft <= 0) {
-                    timeStr = `<span class="text-emerald-400 font-bold animate-pulse">AVAILABLE NOW</span>`;
-                    rowStatusClass = "bg-emerald-950/10";
-                } else {
-                    const hours = Math.floor(timeLeft / 3600000);
-                    const minutes = Math.floor((timeLeft % 3600000) / 60000);
-                    const seconds = Math.floor((timeLeft % 60000) / 1000);
+        // ブロックを生成する関数
+        function createCube(x, y, z, type) {
+            const cube = document.createElement('div');
+            cube.className = `cube ${type}`;
+            
+            // 3D空間上の位置をCSSで決定
+            cube.style.transform = `translate3d(${x * BLOCK_SIZE}px, ${-y * BLOCK_SIZE}px, ${z * BLOCK_SIZE}px)`;
+            
+            // グリッド座標をデータ属性に保持
+            cube.dataset.x = x;
+            cube.dataset.y = y;
+            cube.dataset.z = z;
+
+            // 6つの面を作成
+            const faces = ['front', 'back', 'left', 'right', 'top', 'bottom'];
+            faces.forEach(faceName => {
+                const face = document.createElement('div');
+                face.className = `face ${faceName}`;
+                cube.appendChild(face);
+
+                // クリック時の処理（破壊 or 設置）
+                face.addEventListener('click', (e) => {
+                    e.stopPropagation();
                     
-                    timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                    if(timeLeft < 60000) {
-                        timeStr = `<span class="text-rose-400 font-bold">${timeStr}</span>`; // 1分未満は赤文字
+                    if (e.shiftKey) {
+                        // Shift + クリック: 隣接した場所にブロックを設置
+                        let nx = x, ny = y, nz = z;
+                        if (faceName === 'front')  nz++;
+                        if (faceName === 'back')   nz--;
+                        if (faceName === 'left')   nx--;
+                        if (faceName === 'right')  nx++;
+                        if (faceName === 'top')    ny++;
+                        if (faceName === 'bottom') ny--;
+                        
+                        createCube(nx, ny, nz, blockType);
+                    } else {
+                        // 通常クリック: ブロックを破壊
+                        cube.remove();
                     }
-                }
-
-                // 日時のフォーマット (JST)
-                const dateObj = new Date(item.dropTime);
-                const formatJST = `${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}:${dateObj.getSeconds().toString().padStart(2, '0')}`;
-
-                // 検索数に応じたバッジの色
-                let searchBadge = `<span class="px-2.5 py-1 rounded-md bg-slate-950 text-slate-400 border border-slate-800 mono">${item.searches}</span>`;
-                if(item.searches >= 500) {
-                    searchBadge = `<span class="px-2.5 py-1 rounded-md bg-cyan-950/60 text-cyan-400 border border-cyan-500/30 font-bold mono"><i class="fa-solid fa-fire mr-1"></i> ${item.searches}</span>`;
-                }
-
-                const row = document.createElement('tr');
-                row.className = `hover:bg-slate-800/30 transition-colors ${rowStatusClass}`;
-                row.innerHTML = `
-                    <td class="py-4 px-6 font-bold text-white tracking-wide text-base">${item.id}</td>
-                    <td class="py-4 px-6 text-center">${searchBadge}</td>
-                    <td class="py-4 px-6 text-slate-400 mono">${formatJST}</td>
-                    <td class="py-4 px-6 text-right font-bold mono text-cyan-400">${timeStr}</td>
-                    <td class="py-4 px-6 text-center">
-                        <button onclick="copyToClipboard('${item.id}')" class="text-xs bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-slate-300 px-3 py-1.5 rounded-lg transition-all font-semibold">
-                            <i class="fa-regular fa-copy"></i> Copy
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
+                });
             });
+
+            world.appendChild(cube);
         }
 
-        // コピー機能
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                const toast = document.getElementById('toast');
-                document.getElementById('toast-msg').innerText = `"${text}" をクリップボードにコピーしました`;
-                toast.style.opacity = '1';
-                toast.style.pointerEvents = 'auto';
-                setTimeout(() => {
-                    toast.style.opacity = '0';
-                    toast.style.pointerEvents = 'none';
-                }, 2500);
-            });
+        // 初期平原（マップ）の自動生成
+        function initMap() {
+            for (let x = -WORLD_SIZE/2; x < WORLD_SIZE/2; x++) {
+                for (let z = -WORLD_SIZE/2; z < WORLD_SIZE/2; z++) {
+                    // 1階層目は土、2階層目（表面）は草
+                    createCube(x, 0, z, 'dirt');
+                    createCube(x, 1, z, 'grass');
+                }
+            }
         }
 
-        // 1秒ごとにカウントダウンと表示を更新
-        setInterval(updateTable, 1000);
-        document.getElementById('search-bar').addEventListener('input', updateTable);
-
-        // 初回読み込み
-        updateTable();
+        // 初期化実行
+        initMap();
+        updateCamera();
     </script>
 </body>
 </html>
