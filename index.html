@@ -1,125 +1,680 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stake Blue Casino</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER BOWLING 3D</title>
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff007f;
+            --neon-purple: #9d00ff;
+            --bg-dark: #0a0a16;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #fff;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background: radial-gradient(circle at center, #1a1a3a 0%, #050510 100%);
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: #fff;
+            text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), 0 0 40px var(--neon-purple);
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(0.98); text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-purple); }
+            to { transform: scale(1.02); text-shadow: 0 0 15px var(--neon-pink), 0 0 30px var(--neon-blue); }
+        }
+
+        /* ゲームステージ(3D空間) */
+        .game-container {
+            position: relative;
+            width: 800px;
+            height: 450px;
+            background: #000;
+            border: 4px solid #111;
+            border-image: linear-gradient(to right, var(--neon-blue), var(--neon-pink)) 1;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
+            overflow: hidden;
+            perspective: 400px; /* 3D奥行きの深さ */
+            cursor: none;
+        }
+
+        /* 3Dの舞台 */
+        .stage {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+
+        /* ボウリングレーン */
+        .lane {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 200px;
+            height: 800px;
+            background: linear-gradient(to top, #111 0%, #222 50%, #050505 100%);
+            border-left: 4px solid var(--neon-blue);
+            border-right: 4px solid var(--neon-blue);
+            box-shadow: inset 0 0 20px rgba(0, 243, 255, 0.5);
+            transform: translateX(-50%) rotateX(80deg);
+            transform-origin: bottom center;
+        }
+
+        /* レーンのガイドライン */
+        .lane::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent 49%, var(--neon-purple) 50%, transparent 51%);
+            background-size: 40px 100%;
+            opacity: 0.3;
+        }
+
+        /* ピンの配置エリア */
+        .pin-deck {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            transform-style: preserve-3d;
+        }
+
+        /* ピンの汎用デザイン */
+        .pin {
+            position: absolute;
+            width: 14px;
+            height: 35px;
+            background: linear-gradient(to bottom, #fff 70%, #ff0000 75%, #ff0000 85%, #fff 90%);
+            border-radius: 7px 7px 4px 4px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.8);
+            bottom: 0;
+            transform-origin: bottom center;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.6s;
+        }
+
+        /* ピンの位置（逆三角形の配置） */
+        .pin-1  { left: 53px; bottom: 0px;  z-index: 10; }
+        .pin-2  { left: 38px; bottom: 12px; z-index: 9; }
+        .pin-3  { left: 68px; bottom: 12px; z-index: 9; }
+        .pin-4  { left: 23px; bottom: 24px; z-index: 8; }
+        .pin-5  { left: 53px; bottom: 24px; z-index: 8; }
+        .pin-6  { left: 83px; bottom: 24px; z-index: 8; }
+        .pin-7  { left: 8px;  bottom: 36px; z-index: 7; }
+        .pin-8  { left: 38px; bottom: 36px; z-index: 7; }
+        .pin-9  { left: 68px; bottom: 36px; z-index: 7; }
+        .pin-10 { left: 98px; bottom: 36px; z-index: 7; }
+
+        /* ピンが倒れた時のアニメーションクラス */
+        .pin.hit-left {
+            transform: translateY(-20px) rotateZ(-90deg) rotateX(-45deg) scale(0.5);
+            opacity: 0;
+        }
+        .pin.hit-right {
+            transform: translateY(-20px) rotateZ(90deg) rotateX(45deg) scale(0.5);
+            opacity: 0;
+        }
+
+        /* ボール */
+        .ball {
+            position: absolute;
+            bottom: 20px;
+            left: 385px; /* 中央初期位置 */
+            width: 34px;
+            height: 34px;
+            background: radial-gradient(circle at 30% 30%, var(--neon-pink), #400020 80%);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--neon-pink), inset -3px -3px 10px rgba(0,0,0,0.8);
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        /* ボール投球アニメーション */
+        .ball.roll {
+            transition: bottom 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                        left 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                        transform 0.8s ease-in;
+            bottom: 345px;
+            transform: scale(0.3);
+            box-shadow: 0 0 5px var(--neon-pink);
+        }
+
+        /* ガイド表示・UI */
+        .instruction {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #888;
+            letter-spacing: 1px;
+        }
+
+        .strike-alert {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 4rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 20px var(--neon-pink), 0 0 40px var(--neon-pink);
+            font-style: italic;
+            z-index: 200;
+            pointer-events: none;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .strike-alert.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* サイバーパンク風スコアボード */
+        .scoreboard-container {
+            width: 800px;
+            margin-top: 25px;
+            background: rgba(10, 10, 25, 0.8);
+            border: 2px solid var(--neon-purple);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(157, 0, 255, 0.15);
+        }
+
+        .scoreboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 5px;
+        }
+
+        .player-info {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--neon-blue);
+        }
+
+        .total-score-display {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--neon-pink);
+            text-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .score-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        .score-table th {
+            background: rgba(157, 0, 255, 0.2);
+            color: #ccc;
+            font-size: 0.8rem;
+            padding: 6px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .score-table td {
+            border: 1px solid rgba(255,255,255,0.1);
+            height: 45px;
+            min-width: 60px;
+            position: relative;
+        }
+
+        /* 各投球の小さなスコアマス */
+        .shots {
+            display: flex;
+            height: 22px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .shot {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .shot:not(:last-child) {
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* フレームごとの累計スコア */
+        .frame-total {
+            height: 23px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+            color: var(--neon-blue);
+        }
+
+        .current-frame-box {
+            box-shadow: inset 0 0 8px var(--neon-blue);
+            background: rgba(0, 243, 255, 0.05);
+        }
+
+        /* コントロールボタン */
+        .btn {
+            margin-top: 15px;
+            padding: 10px 25px;
+            background: transparent;
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+        }
+
+        .btn:hover {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+    </style>
 </head>
-<body class="bg-[#06111f] text-white overflow-hidden min-h-screen">
-  <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(0,140,255,0.25),transparent_35%),radial-gradient(circle_at_bottom,rgba(0,255,200,0.15),transparent_30%)]"></div>
+<body>
 
-  <header class="relative z-10 flex items-center justify-between px-8 py-6 border-b border-cyan-400/10 backdrop-blur-xl">
-    <div>
-      <h1 class="text-4xl font-black tracking-[0.2em] text-cyan-300">
-        STAKE BLUE
-      </h1>
-      <p class="text-sm text-cyan-100/60 mt-1">
-        FUTURISTIC CASINO EXPERIENCE
-      </p>
+    <header>
+        <h1>Cyber Bowling 3D</h1>
+        <p class="instruction">マウスを左右に動かしてエイム、クリックでパワーショット！</p>
+    </header>
+
+    <!-- ゲーム画面 -->
+    <div class="game-container" id="gameContainer">
+        <div class="strike-alert" id="strikeAlert">STRIKE!</div>
+        
+        <div class="stage">
+            <!-- レーン -->
+            <div class="lane"></div>
+            
+            <!-- ピン（10本） -->
+            <div class="pin-deck" id="pinDeck">
+                <div class="pin pin-1" id="pin-1"></div>
+                <div class="pin pin-2" id="pin-2"></div>
+                <div class="pin pin-3" id="pin-3"></div>
+                <div class="pin pin-4" id="pin-4"></div>
+                <div class="pin pin-5" id="pin-5"></div>
+                <div class="pin pin-6" id="pin-6"></div>
+                <div class="pin pin-7" id="pin-7"></div>
+                <div class="pin pin-8" id="pin-8"></div>
+                <div class="pin pin-9" id="pin-9"></div>
+                <div class="pin pin-10" id="pin-10"></div>
+            </div>
+
+            <!-- ボール -->
+            <div class="ball" id="ball"></div>
+        </div>
     </div>
 
-    <div class="flex items-center gap-4">
-      <div id="coinBox" class="rounded-2xl bg-cyan-400/10 border border-cyan-400/20 px-5 py-3 text-cyan-200 font-bold">
-        💰 1000 COINS
-      </div>
+    <button class="btn" id="resetBtn" style="display: none;">Next Frame</button>
 
-      <button class="rounded-2xl bg-cyan-400 px-6 py-3 text-black font-black shadow-2xl shadow-cyan-500/30">
-        LOGIN
-      </button>
+    <!-- スコアボード -->
+    <div class="scoreboard-container">
+        <div class="scoreboard-header">
+            <div class="player-info">PLAYER 01</div>
+            <div class="total-score-display">TOTAL: <span id="totalScore">0</span></div>
+        </div>
+        <div class="table-wrapper">
+            <table class="score-table">
+                <thead>
+                    <tr>
+                        <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+                        <th>6</th><th>7</th><th>8</th><th>9</th><th>10</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="scoreRow">
+                        <!-- JSでフレームを生成 -->
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-  </header>
 
-  <main class="relative z-10 max-w-7xl mx-auto px-8 py-14">
-    <section class="grid lg:grid-cols-2 gap-10 items-center">
-      <div>
-        <div class="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-5 py-2 text-cyan-300 font-bold mb-8">
-          ⚡ LIVE CASINO MODE
-        </div>
+    <script>
+        // ゲーム状態の管理
+        const state = {
+            currentFrame: 1,
+            currentShot: 1, // 1 or 2 (or 3 for 10th frame)
+            scores: Array.from({length: 11}, () => []), // 各フレームの投球スコア
+            frameTotals: Array(11).fill(null), // 各フレームの累積スコア表示用
+            pinsStatus: Array(10).fill(true), // true = 立っている, false = 倒れている
+            isRolling: false,
+            gameOver: false
+        };
 
-        <h2 class="text-6xl md:text-7xl font-black leading-none">
-          PLAY.
-          <span class="block text-cyan-300">WIN.</span>
-          <span class="block text-white/80">REPEAT.</span>
-        </h2>
+        // DOMの取得
+        const gameContainer = document.getElementById('gameContainer');
+        const ball = document.getElementById('ball');
+        const pinDeck = document.getElementById('pinDeck');
+        const strikeAlert = document.getElementById('strikeAlert');
+        const resetBtn = document.getElementById('resetBtn');
+        const totalScoreDisplay = document.getElementById('totalScore');
+        const scoreRow = document.getElementById('scoreRow');
 
-        <p class="mt-8 text-xl text-cyan-50/70 max-w-xl leading-relaxed">
-          Stake風の青ネオンカジノUI。HTMLだけで動くスロットゲーム付き。
-        </p>
+        // スコアボードの初期化生成
+        function initScoreboard() {
+            scoreRow.innerHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                const td = document.createElement('td');
+                td.id = `f-${i}`;
+                if(i === 1) td.classList.add('current-frame-box');
+                
+                const numShots = i === 10 ? 3 : 2;
+                let shotsHtml = '<div class="shots">';
+                for(let s=1; s<=numShots; s++) {
+                    shotsHtml += `<div class="shot" id="f-${i}-s-${s}"></div>`;
+                }
+                shotsHtml += '</div>';
+                shotsHtml += `<div class="frame-total" id="f-${i}-total"></div>`;
+                
+                td.innerHTML = shotsHtml;
+                scoreRow.appendChild(td);
+            }
+        }
 
-        <div class="flex gap-5 mt-10">
-          <button onclick="spinSlots()" class="rounded-2xl bg-cyan-400 px-10 py-5 text-black font-black text-xl shadow-2xl shadow-cyan-400/40 hover:scale-105 transition-transform">
-            SPIN NOW
-          </button>
+        // マウス移動によるボールの左右エイム
+        gameContainer.addEventListener('mousemove', (e) => {
+            if (state.isRolling || state.gameOver) return;
+            const rect = gameContainer.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            
+            // レーンの幅に合わせて移動制限 (300px ~ 470px の間くらい)
+            let ballX = mouseX - 17; 
+            if (ballX < 310) ballX = 310;
+            if (ballX > 460) ballX = 460;
+            
+            ball.style.left = ballX + 'px';
+        });
 
-          <button class="rounded-2xl border border-cyan-400/20 bg-white/5 backdrop-blur-xl px-10 py-5 font-bold hover:bg-cyan-400/10 transition">
-            LIVE TABLES
-          </button>
-        </div>
-      </div>
+        // クリックで投球
+        gameContainer.addEventListener('click', () => {
+            if (state.isRolling || state.gameOver) return;
+            rollBall();
+        });
 
-      <div class="rounded-[2rem] border border-cyan-400/20 bg-[#0d1b2d]/80 backdrop-blur-2xl p-8 shadow-[0_0_60px_rgba(0,200,255,0.15)]">
-        <div class="flex items-center justify-between mb-8">
-          <div>
-            <h3 class="text-3xl font-black text-cyan-300">SLOT MACHINE</h3>
-            <p class="text-cyan-100/50 mt-2">BET: 50 COINS</p>
-          </div>
+        // 投球物理（風）シミュレーションアニメーション
+        function rollBall() {
+            state.isRolling = true;
+            ball.classList.add('roll');
 
-          <div id="message" class="rounded-xl bg-cyan-400/10 px-4 py-2 text-cyan-200 font-bold border border-cyan-400/20">
-            READY TO SPIN
-          </div>
-        </div>
+            // ボールの現在位置（エイム位置）
+            const ballX = ball.offsetLeft + 17; // 中心
+            // わずかなランダムブレ（フック効果っぽく）
+            const drift = (Math.random() - 0.5) * 20;
+            ball.style.left = (ball.offsetLeft + drift) + 'px';
 
-        <div class="grid grid-cols-3 gap-5">
-          <div id="slot1" class="aspect-square rounded-3xl bg-[#13263f] border border-cyan-400/20 flex items-center justify-center text-6xl shadow-inner">💎</div>
-          <div id="slot2" class="aspect-square rounded-3xl bg-[#13263f] border border-cyan-400/20 flex items-center justify-center text-6xl shadow-inner">7️⃣</div>
-          <div id="slot3" class="aspect-square rounded-3xl bg-[#13263f] border border-cyan-400/20 flex items-center justify-center text-6xl shadow-inner">🔥</div>
-        </div>
+            // ボールがピンに到達するタイミング (800ms)
+            setTimeout(() => {
+                calculateHit(ballX + drift);
+            }, 750);
+        }
 
-        <button onclick="spinSlots()" class="mt-8 w-full rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 py-5 text-xl font-black text-black hover:brightness-110 transition shadow-2xl">
-          🎰 SPIN THE MACHINE
-        </button>
-      </div>
-    </section>
-  </main>
+        // ヒット判定とピンの物理（アニメーション）
+        function calculateHit(finalBallX) {
+            // レーン中心(385px付近)からのズレを算出
+            const centerOffset = Math.abs(finalBallX - 385);
+            
+            let hitCount = 0;
+            let currentPinsLeft = state.pinsStatus.filter(p => p).length;
 
-  <script>
-    const icons = ["💎", "7️⃣", "🔥", "⚡", "🎰", "🪙"];
-    let coins = 1000;
+            // 簡易物理判定: 中心に近いほど多く倒れる
+            state.pinsStatus.forEach((isStanding, index) => {
+                if (!isStanding) return; // 既に倒れている
 
-    function randomIcon() {
-      return icons[Math.floor(Math.random() * icons.length)];
-    }
+                // ピンごとに倒れる確率を制御（中心に近いエイムならストライク率UP）
+                let fallChance = 0.1;
+                if (centerOffset < 12) fallChance = 0.95; // ほぼストライク
+                else if (centerOffset < 25) fallChance = 0.7;
+                else if (centerOffset < 45) fallChance = 0.4;
+                
+                // ピンの列ごとの補正
+                if (index === 0 && centerOffset < 30) fallChance += 0.2; // 1番ピン
 
-    function spinSlots() {
-      if (coins < 50) {
-        document.getElementById("message").innerText = "NOT ENOUGH COINS";
-        return;
-      }
+                if (Math.random() < fallChance) {
+                    state.pinsStatus[index] = false;
+                    hitCount++;
+                    
+                    // 左右どちらにぶっ飛ぶか
+                    const pinEl = document.getElementById(`pin-${index + 1}`);
+                    const direction = Math.random() > 0.5 ? 'hit-left' : 'hit-right';
+                    pinEl.classList.add(direction);
+                }
+            });
 
-      coins -= 50;
+            // 演出とスコア処理
+            if (hitCount === currentPinsLeft && state.currentShot === 1) {
+                showStrikeAlert("STRIKE!");
+            } else if (hitCount === currentPinsLeft && state.currentShot === 2) {
+                showStrikeAlert("SPARE!");
+            }
 
-      const s1 = randomIcon();
-      const s2 = randomIcon();
-      const s3 = randomIcon();
+            recordScore(hitCount);
+        }
 
-      document.getElementById("slot1").innerText = s1;
-      document.getElementById("slot2").innerText = s2;
-      document.getElementById("slot3").innerText = s3;
+        function showStrikeAlert(text) {
+            strikeAlert.innerText = text;
+            strikeAlert.classList.add('show');
+            setTimeout(() => strikeAlert.classList.remove('show'), 1200);
+        }
 
-      let message = "TRY AGAIN";
+        // スコア計算ロジック
+        function recordScore(count) {
+            const f = state.currentFrame;
+            const s = state.currentShot;
+            
+            state.scores[f].push(count);
 
-      if (s1 === s2 && s2 === s3) {
-        coins += 500;
-        message = "🎉 JACKPOT +500";
-      } else if (s1 === s2 || s2 === s3 || s1 === s3) {
-        coins += 120;
-        message = "✨ NICE WIN +120";
-      }
+            // 表示の変換 (ストライクは'X', スペアは'/', ガーターは'-')
+            let displayChar = count.toString();
+            if (count === 0) displayChar = '-';
+            
+            if (f < 10) {
+                if (s === 1 && count === 10) {
+                    displayChar = 'X';
+                    document.getElementById(`f-${f}-s-2`).innerText = '';
+                    advanceFrame(true); // ストライクなので次フレームへ
+                    return;
+                } else if (s === 2 && (state.scores[f][0] + state.scores[f][1] === 10)) {
+                    displayChar = '/';
+                }
+            } else {
+                // 10フレーム目の特殊規則
+                if (count === 10) displayChar = 'X';
+                else if (s > 1 && (state.scores[f][s-1] + state.scores[f][s-2] === 10) && state.scores[f][s-2] !== 10) displayChar = '/';
+            }
 
-      document.getElementById("message").innerText = message;
-      document.getElementById("coinBox").innerText = `💰 ${coins} COINS`;
-    }
-  </script>
+            document.getElementById(`f-${f}-s-${s}`).innerText = displayChar;
+
+            // 次の投球判定
+            if (f < 10) {
+                if (s === 1) {
+                    state.currentShot = 2;
+                    // 残ったピンで第2投へ
+                    setTimeout(() => { resetBallOnly(); }, 1000);
+                } else {
+                    advanceFrame(false);
+                }
+            } else {
+                // 10フレーム目の進行
+                if (s === 1) {
+                    state.currentShot = 2;
+                    if(count === 10) resetPinsGraphic(); // ストライクならピン復活
+                    setTimeout(() => { resetBallOnly(); }, 1000);
+                } else if (s === 2) {
+                    const total10th = state.scores[10][0] + state.scores[10][1];
+                    if (total10th >= 10) {
+                        state.currentShot = 3;
+                        if(count === 10 || total10th === 10) resetPinsGraphic();
+                        setTimeout(() => { resetBallOnly(); }, 1000);
+                    } else {
+                        endGame();
+                    }
+                } else {
+                    endGame();
+                }
+            }
+            updateTotalScores();
+        }
+
+        function advanceFrame(isStrike) {
+            updateTotalScores();
+            setTimeout(() => {
+                document.getElementById(`f-${state.currentFrame}`).classList.remove('current-frame-box');
+                state.currentFrame++;
+                if (state.currentFrame > 10) {
+                    endGame();
+                } else {
+                    document.getElementById(`f-${state.currentFrame}`).classList.add('current-frame-box');
+                    state.currentShot = 1;
+                    resetPinsGraphic();
+                    resetBallOnly();
+                }
+            }, 1000);
+        }
+
+        // ボールだけを手元に戻す
+        function resetBallOnly() {
+            ball.classList.remove('roll');
+            ball.style.left = '385px';
+            state.isRolling = false;
+        }
+
+        // ピンを綺麗に並べ直す
+        function resetPinsGraphic() {
+            state.pinsStatus.fill(true);
+            for (let i = 1; i <= 10; i++) {
+                const p = document.getElementById(`pin-${i}`);
+                p.classList.remove('hit-left', 'hit-right');
+            }
+        }
+
+        // 伝統的なボウリングの自動スコア計算（ストライク・スペア加算対応）
+        function updateTotalScores() {
+            let runningTotal = 0;
+            
+            for (let i = 1; i <= 10; i++) {
+                const frameShots = state.scores[i];
+                if (!frameShots || frameShots.length === 0) break;
+
+                // 1~9フレームの計算
+                if (i < 10) {
+                    if (frameShots[0] === 10) { // ストライク
+                        const next1 = state.scores[i+1]?.[0];
+                        let next2 = state.scores[i+1]?.[1];
+                        
+                        if (next1 === 10 && i < 9) {
+                            next2 = state.scores[i+2]?.[0];
+                        }
+                        
+                        if (next1 !== undefined && next2 !== undefined) {
+                            runningTotal += 10 + next1 + next2;
+                            state.frameTotals[i] = runningTotal;
+                        } else {
+                            state.frameTotals[i] = null; // まだ加算できない
+                        }
+                    } else if (frameShots[0] + frameShots[1] === 10) { // スペア
+                        const next1 = state.scores[i+1]?.[0];
+                        if (next1 !== undefined) {
+                            runningTotal += 10 + next1;
+                            state.frameTotals[i] = runningTotal;
+                        } else {
+                            state.frameTotals[i] = null;
+                        }
+                    } else { // オープンフレーム
+                        if (frameShots[1] !== undefined) {
+                            runningTotal += frameShots[0] + frameShots[1];
+                            state.frameTotals[i] = runningTotal;
+                        }
+                    }
+                } else {
+                    // 10フレーム目の計算
+                    if (frameShots.length >= 2 && (frameShots[0]+frameShots[1] < 10)) {
+                        runningTotal += frameShots[0] + frameShots[1];
+                        state.frameTotals[i] = runningTotal;
+                    } else if (frameShots.length === 3) {
+                        runningTotal += frameShots[0] + frameShots[1] + frameShots[2];
+                        state.frameTotals[i] = runningTotal;
+                    }
+                }
+
+                // スコアボードの累積表示を更新
+                if (state.frameTotals[i] !== null) {
+                    document.getElementById(`f-${i}-total`).innerText = state.frameTotals[i];
+                    totalScoreDisplay.innerText = state.frameTotals[i];
+                }
+            }
+        }
+
+        function endGame() {
+            state.gameOver = true;
+            updateTotalScores();
+            alert(`GAME OVER! スコアは ${totalScoreDisplay.innerText} 点でした！`);
+            resetBtn.innerText = "RESTART GAME";
+            resetBtn.style.display = 'block';
+        }
+
+        // 次のフレームへ/再起動ボタン
+        resetBtn.addEventListener('click', () => {
+            if (state.gameOver) {
+                // 完全リセット
+                state.currentFrame = 1;
+                state.currentShot = 1;
+                state.scores = Array.from({length: 11}, () => []);
+                state.frameTotals.fill(null);
+                state.gameOver = false;
+                totalScoreDisplay.innerText = '0';
+                initScoreboard();
+                resetBtn.style.display = 'none';
+            }
+            resetPinsGraphic();
+            resetBallOnly();
+        });
+
+        // アプリ起動
+        initScoreboard();
+    </script>
 </body>
 </html>
