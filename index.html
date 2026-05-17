@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>HTML5 クラフトゲーム Pro (モード切替版)</title>
+    <title>HTML5 クラフトゲーム Pro (完全トグル版)</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; touch-action: none; }
         body, html { width: 100%; height: 100%; overflow: hidden; background: #87CEEB; font-family: sans-serif; user-select: none; }
@@ -12,7 +12,7 @@
         #screen {
             width: 100%;
             height: 100%;
-            perspective: 600px;
+            perspective: 800px; /* 視野角を少し広げました */
             overflow: hidden;
             position: relative;
         }
@@ -23,7 +23,8 @@
             top: 50%;
             left: 50%;
             transform-style: preserve-3d;
-            transform: translate3d(0, 100px, -400px) rotateX(-25deg) rotateY(45deg);
+            /* 初期位置を -400px から -550px に変更してズームアウト */
+            transform: translate3d(0, 80px, -550px) rotateX(-25deg) rotateY(45deg);
         }
 
         /* ブロックの基本定義 */
@@ -114,18 +115,18 @@
         .icon.wood  { background: #bf8d60; }
         .icon.brick { background: #c7634e; }
 
-        /* ★スマホ用モード切り替えボタン */
+        /* スマホ用モード切り替えボタン */
         #mode-toggle {
             position: absolute;
             bottom: 20px;
             right: 20px;
-            width: 70px;
-            height: 70px;
+            width: 75px;
+            height: 75px;
             border-radius: 50%;
             border: none;
             color: white;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 13px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.4);
             cursor: pointer;
             z-index: 15;
@@ -134,18 +135,16 @@
             align-items: center;
             justify-content: center;
         }
-        /* 破壊モード（赤） */
         .mode-break { background: #ff4d4d; }
-        /* 建築モード（緑） */
         .mode-build { background: #2ecc71; }
     </style>
 </head>
 <body>
 
     <div id="ui">
-        <strong>HTML5 クラフトゲーム (スマホUI最適化版)</strong><br>
+        <strong>HTML5 クラフトゲーム (引きの視点版)</strong><br>
         【PC】クリック: 破壊 / Shift+クリック: 設置<br>
-        【スマホ】右下のボタンで<b>「はかい」</b>と<b>「けんちく」</b>を切り替えてタップ！
+        【スマホ】右下ボタンでモード切替（タップするだけで即実行！）
     </div>
 
     <!-- スマホ用モード切替ボタン -->
@@ -176,20 +175,17 @@
         const BLOCK_SIZE = 40;
         const WORLD_SIZE = 8; 
         let blockType = 'grass'; 
-        
-        // スマホ用の現在の操作モード ('break' または 'build')
-        let mobileMode = 'break';
+        let mobileMode = 'break'; // 'break'(はかい) または 'build'(けんちく)
 
-        // カメラ（視点）
+        // カメラ（視点） 初期値を少し後ろに（panZ = -550）
         let rotX = -25; let rotY = 45;
-        let panX = 0;   let panZ = -400;
+        let panX = 0;   let panZ = -550;
 
         // タッチ・マウス共通のドラッグ処理
         let isDragging = false;
         let prevX = 0; let prevY = 0;
 
         function startPan(x, y, target) {
-            // ブロックの面、スロット、モードボタンの上では視点移動を発動させない
             if (target.classList.contains('face') || target.closest('#hotbar') || target.closest('#mode-toggle')) return;
             isDragging = true;
             prevX = x; prevY = y;
@@ -209,7 +205,7 @@
         window.addEventListener('mousemove', (e) => movePan(e.clientX, e.clientY));
         window.addEventListener('mouseup', endPan);
 
-        // タッチイベント (スマホ用)
+        // タッチイベント
         window.addEventListener('touchstart', (e) => {
             const t = e.touches[0];
             startPan(t.clientX, t.clientY, e.target);
@@ -222,10 +218,10 @@
 
         // カメラ更新
         function updateCamera() {
-            world.style.transform = `translate3d(${panX}px, 100px, ${panZ}px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+            world.style.transform = `translate3d(${panX}px, 80px, ${panZ}px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
         }
 
-        // スマホ用モード切り替えボタンの処理
+        // スマホ用モード切り替え（完全トグル）
         function toggleMode() {
             if (mobileMode === 'break') {
                 mobileMode = 'build';
@@ -243,21 +239,21 @@
             toggleMode();
         });
 
-        // 下部ホットバーの切り替え
+        // ホットバー切り替え
         slots.forEach(slot => {
             const selectType = () => {
                 slots.forEach(s => s.classList.remove('active'));
                 slot.classList.add('active');
                 blockType = slot.dataset.type;
                 
-                // ブロックを選んだら自動的に建築モードにしてあげると親切
+                // ブロック選択時は自動で建築モードへトグル
                 if (mobileMode === 'break') toggleMode();
             };
             slot.addEventListener('click', selectType);
             slot.addEventListener('touchstart', (e) => { e.stopPropagation(); selectType(); });
         });
 
-        // ブロック作成システム
+        // ブロック作成
         function createCube(x, y, z, type) {
             const cube = document.createElement('div');
             cube.className = `cube ${type}`;
@@ -269,7 +265,6 @@
                 face.className = `face ${faceName}`;
                 cube.appendChild(face);
 
-                // 設置の共通処理
                 const placeBlock = () => {
                     let nx = x, ny = y, nz = z;
                     if (faceName === 'front')  nz++;
@@ -281,25 +276,21 @@
                     createCube(nx, ny, nz, blockType);
                 };
 
-                // PC用: クリック判定（通常クリック＝破壊、Shift+クリック＝設置）
+                // PC環境用のクリックイベント
                 face.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    // PC環境かどうかの簡易チェック（Shiftキー判定、またはタッチモードボタンを無視する場合）
-                    if (e.shiftKey) {
-                        placeBlock();
-                    } else {
-                        cube.remove();
-                    }
+                    if (e.shiftKey) placeBlock();
+                    else cube.remove();
                 });
 
-                // スマホ用: タッチ操作（現在のモードボタンの状態に応じて1発で切り替え）
+                // スマホ・タブレット環境用のタッチイベント（長押しを廃止し、トグルモードに従う）
                 face.addEventListener('touchstart', (e) => {
                     e.stopPropagation();
                     
                     if (mobileMode === 'build') {
-                        placeBlock(); // 建築モードなら即設置
+                        placeBlock(); // 建築モードなら1タップで即設置
                     } else {
-                        cube.remove(); // 破壊モードなら即削除
+                        cube.remove(); // 破壊モードなら1タップで即破壊
                     }
                 });
             });
