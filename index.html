@@ -3,294 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRO DESIGN | Premium Portfolio</title>
+    <title>__kbvl // OFFICIAL</title>
     <style>
-        /* --- リセット & 基本設定 --- */
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Noto+Sans+JP:wght@300;700&display=swap');
+
+        :root {
+            --accent: #ff3e3e; /* 攻撃的な赤：Rustや対人ゲームのイメージ */
+            --bg: #050505;
+            --card-bg: #111;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif;
         }
 
         body {
-            background-color: #0d0d0d;
-            color: #ffffff;
-            line-height: 1.6;
+            background-color: var(--bg);
+            color: #fff;
+            font-family: 'Noto Sans JP', sans-serif;
             overflow-x: hidden;
         }
 
-        a {
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.3s ease;
+        /* 背景にノイズ感を出す演出 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url(https://grainy-gradients.vercel.app/noise.svg);
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 9999;
         }
 
-        /* --- ヘッダー --- */
-        header {
+        /* --- ナビゲーション --- */
+        nav {
             position: fixed;
-            top: 0;
-            left: 0;
             width: 100%;
-            padding: 20px 40px;
+            padding: 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 1000;
-            background: rgba(13, 13, 13, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 100;
+            mix-blend-mode: difference;
         }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 900;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            background: linear-gradient(45deg, #fff, #888);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 30px;
-        }
-
-        .nav-links a {
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: #aaa;
-        }
-
-        .nav-links a:hover {
+        .id-link {
+            font-family: 'Syncopate', sans-serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: 5px;
+            text-decoration: none;
             color: #fff;
         }
 
-        /* --- ヒーローセクション --- */
+        /* --- ヒーロー --- */
         .hero {
             height: 100vh;
             display: flex;
+            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            padding: 0 10%;
-            position: relative;
-            background: radial-gradient(circle at 80% 20%, #1a1a2e 0%, #0d0d0d 60%);
-        }
-
-        .hero-content {
-            max-width: 600px;
-            z-index: 10;
-        }
-
-        .hero-tag {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            color: #00ffcc;
-            margin-bottom: 20px;
-            display: inline-block;
+            text-align: center;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+                        url('https://images.unsplash.com/photo-1627398242454-45a1465c2479?q=80&w=1920&auto=format&fit=crop'); /* Minecraftの夜をイメージした画像 */
+            background-size: cover;
+            background-position: center;
         }
 
         .hero h1 {
-            font-size: 4rem;
-            font-weight: 900;
-            line-height: 1.1;
-            margin-bottom: 30px;
-            letter-spacing: -1px;
+            font-family: 'Syncopate', sans-serif;
+            font-size: clamp(3rem, 10vw, 8rem);
+            line-height: 1;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: -2px;
         }
 
-        .hero p {
-            font-size: 1.1rem;
-            color: #888;
-            margin-bottom: 40px;
+        .hero .games {
+            font-size: 0.9rem;
+            letter-spacing: 10px;
+            color: var(--accent);
+            text-transform: uppercase;
         }
 
-        .btn {
-            display: inline-block;
-            padding: 15px 35px;
-            background-color: #fff;
-            color: #000;
-            font-weight: 700;
-            border-radius: 50px;
-            letter-spacing: 1px;
-            box-shadow: 0 10px 20px rgba(255,255,255,0.1);
-        }
-
-        .btn:hover {
-            background-color: #00ffcc;
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(0,255,204,0.3);
-        }
-
-        /* --- メインコンテンツ領域 --- */
+        /* --- セクション --- */
         .container {
-            padding: 100px 10%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 20px;
         }
 
-        .section-title {
-            font-size: 2.5rem;
-            margin-bottom: 60px;
-            position: relative;
-            display: inline-block;
+        .section-label {
+            font-family: 'Syncopate', sans-serif;
+            color: var(--accent);
+            margin-bottom: 50px;
+            display: block;
+            font-size: 0.8rem;
         }
 
-        .section-title::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            bottom: -10px;
-            width: 50px;
-            height: 2px;
-            background-color: #00ffcc;
-        }
-
-        /* --- ワークス（実績）グリッド --- */
-        .works-grid {
+        /* --- ギャラリー（ゲーム画像） --- */
+        .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
         }
 
-        .work-card {
-            background: #161616;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid #222;
-        }
-
-        .work-img-box {
+        .card {
             position: relative;
+            height: 400px;
             overflow: hidden;
-            padding-top: 66.66%; /* 3:2のアスペクト比 */
+            background: var(--card-bg);
+            border: 1px solid #222;
+            transition: 0.4s;
         }
 
-        .work-img-box img {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .card:hover {
+            border-color: var(--accent);
+            transform: translateY(-10px);
+        }
+
+        .card img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.5s ease;
+            opacity: 0.7;
+            transition: 0.4s;
         }
 
-        .work-card:hover .work-img-box img {
-            transform: scale(1.08);
+        .card:hover img {
+            opacity: 1;
+            transform: scale(1.05);
         }
 
-        .work-info {
-            padding: 25px;
+        .card-content {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
         }
 
-        .work-category {
-            font-size: 0.8rem;
-            color: #00ffcc;
+        .card-title {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 1.5rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
-
-        .work-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .work-desc {
-            color: #666;
-            font-size: 0.9rem;
         }
 
         /* --- フッター --- */
         footer {
-            background-color: #050505;
-            padding: 60px 10%;
+            padding: 100px 20px;
             text-align: center;
-            border-top: 1px solid #111;
-            color: #444;
-            font-size: 0.9rem;
+            border-top: 1px solid #222;
         }
 
-        /* --- レスポンシブ（スマホ対応） --- */
-        @media (max-width: 768px) {
-            header { padding: 20px; }
-            .nav-links { display: none; } /* 簡易化のためスマホではナビ隠し */
-            .hero h1 { font-size: 2.5rem; }
-            .container { padding: 60px 5%; }
+        .x-link {
+            display: inline-block;
+            padding: 15px 40px;
+            border: 1px solid #fff;
+            color: #fff;
+            text-decoration: none;
+            font-family: 'Syncopate', sans-serif;
+            font-size: 0.8rem;
+            transition: 0.3s;
         }
+
+        .x-link:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        /* スクロールバーのカスタマイズ */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); }
+
     </style>
 </head>
 <body>
 
-    <!-- ヘッダー -->
-    <header>
-        <div class="logo">PRO.DESIGN</div>
-        <ul class="nav-links">
-            <li><a href="#home">Home</a></li>
-            <li><a href="#works">Works</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
-        </ul>
-    </header>
+    <nav>
+        <a href="#" class="id-link">__KBVL</a>
+        <div><small>EST. 2024</small></div>
+    </nav>
 
-    <!-- ヒーローセクション -->
-    <section class="hero" id="home">
-        <div class="hero-content">
-            <span class="hero-tag">Digital Experience</span>
-            <h1>We Create<br>Future Design.</h1>
-            <p>プロフェッショナルな美しさと、最先端のテクノロジーを融合。あなたのビジネスを次のステージへ導くクリエイティブを提供します。</p>
-            <a href="#works" class="btn">View Our Works</a>
-        </div>
+    <section class="hero">
+        <div class="games">Minecraft / Rust / Others</div>
+        <h1>__KBVL</h1>
+        <p style="opacity: 0.5; letter-spacing: 2px;">DIGITAL SURVIVOR & ARCHITECT</p>
     </section>
 
-    <!-- ワークスセクション -->
-    <main class="container" id="works">
-        <h2 class="section-title">Selected Works</h2>
-        
-        <div class="works-grid">
-            <!-- 実績 1 -->
-            <div class="work-card">
-                <div class="work-img-box">
-                    <img src="https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80" alt="WEB DESIGN">
-                </div>
-                <div class="work-info">
-                    <div class="work-category">Web Design</div>
-                    <div class="work-title">Neo Agency Corporate</div>
-                    <div class="work-desc">次世代クリエイティブエージェンシーのコーポレートサイト。</div>
+    <div class="container">
+        <span class="section-label">// LATEST ACTIVITY</span>
+        <div class="grid">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1615438822009-40813959dfb6?q=80&w=800" alt="Minecraft">
+                <div class="card-content">
+                    <div class="card-title">Minecraft</div>
+                    <p>Building the world.</p>
                 </div>
             </div>
-
-            <!-- 実績 2 -->
-            <div class="work-card">
-                <div class="work-img-box">
-                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80" alt="BRANDING">
-                </div>
-                <div class="work-info">
-                    <div class="work-category">Branding</div>
-                    <div class="work-title">Quantum App UI/UX</div>
-                    <div class="work-desc">暗号資産を一元管理するダッシュボードアプリのUI設計。</div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=800" alt="Gaming">
+                <div class="card-content">
+                    <div class="card-title">Rust</div>
+                    <p>Survival of the fittest.</p>
                 </div>
             </div>
-
-            <!-- 実績 3 -->
-            <div class="work-card">
-                <div class="work-img-box">
-                    <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80" alt="MARKETING">
-                </div>
-                <div class="work-info">
-                    <div class="work-category">E-Commerce</div>
-                    <div class="work-title">Minimalist Fashion Shop</div>
-                    <div class="work-desc">余白を贅沢に使った、高級アパレルブランドのECサイト。</div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=800" alt="Retro Tech">
+                <div class="card-content">
+                    <div class="card-title">Setup</div>
+                    <p>Optimized for performance.</p>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
-    <!-- フッター -->
     <footer>
-        <p>&copy; 2026 PRO.DESIGN. All rights reserved.</p>
+        <span class="section-label">GET IN TOUCH</span>
+        <h2 style="font-size: 2rem; margin-bottom: 30px; font-family: 'Syncopate';">CONNECT WITH ME</h2>
+        <a href="https://x.com/__kbvl" class="x-link" target="_blank">FOLLOW @__KBVL ON X</a>
+        <p style="margin-top: 50px; opacity: 0.3; font-size: 0.7rem;">&copy; __KBVL. ALL RIGHTS RESERVED.</p>
     </footer>
 
 </body>
