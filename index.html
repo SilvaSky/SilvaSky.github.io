@@ -1,322 +1,212 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RareMC Drops</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Space Grotesk', sans-serif;
-      background: #050816;
-      overflow-x: hidden;
-    }
-
-    .glass {
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .glow {
-      box-shadow: 0 0 20px rgba(168,85,247,0.3);
-    }
-
-    .neon {
-      color: #c084fc;
-      text-shadow: 0 0 12px rgba(192,132,252,0.8);
-    }
-
-    .bg-grid {
-      background-image:
-      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size: 40px 40px;
-    }
-
-    .pulse-dot {
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.4); opacity: 0.4; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    .card-hover:hover {
-      transform: translateY(-4px);
-      transition: 0.25s ease;
-      border-color: rgba(192,132,252,0.5);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ MC RARE ID TRACKER</title>
+    <!-- Tailwind CSS & FontAwesome for Premium Design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #0b0f19;
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .gradient-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #0b0f19 100%);
+        }
+        .neon-border {
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+        .neon-text-cyan {
+            text-shadow: 0 0 8px rgba(6, 182, 212, 0.5);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0b0f19; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+    </style>
 </head>
-<body class="text-white bg-grid min-h-screen">
+<body class="text-slate-200 min-h-screen gradient-bg selection:bg-cyan-500 selection:text-slate-900">
 
-  <div class="absolute top-[-200px] left-[-100px] w-[500px] h-[500px] bg-purple-600 rounded-full blur-3xl opacity-20"></div>
-  <div class="absolute bottom-[-200px] right-[-100px] w-[500px] h-[500px] bg-blue-500 rounded-full blur-3xl opacity-20"></div>
+    <!-- Header / Navbar -->
+    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-cyan-500 text-slate-950 p-2 rounded-lg font-bold tracking-wider text-sm animate-pulse">
+                    <i class="fa-solid fa-bolt"></i> DROP
+                </div>
+                <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+                    3NAME <span class="text-cyan-400 font-light">CLONE</span>
+                </span>
+            </div>
+            <div class="flex items-center space-x-4 text-sm text-slate-400">
+                <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-ping"></span> Live Tracking</span>
+            </div>
+        </div>
+    </header>
 
-  <header class="relative z-10 px-8 py-8 flex items-center justify-between border-b border-white/10">
-    <div>
-      <h1 class="text-4xl font-bold neon">RareMC Drops</h1>
-      <p class="text-gray-400 mt-1">Live Minecraft Rare Name Drop Tracker</p>
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        <!-- Dashboard Stats & Filter Info -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 backdrop-blur-sm">
+                <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Target Filters</p>
+                <p class="text-xl font-bold text-cyan-400 neon-text-cyan">NameMC Searches ≥ 80</p>
+            </div>
+            <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 backdrop-blur-sm">
+                <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Total Rare Drops</p>
+                <p class="text-2xl font-bold text-white mono" id="total-count">0</p>
+            </div>
+            <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 backdrop-blur-sm flex items-center justify-between">
+                <div>
+                    <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Search & Filter</p>
+                    <input type="text" id="search-bar" placeholder="IDを検索..." class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-cyan-500 text-slate-200 w-full transition-all">
+                </div>
+                <i class="fa-solid fa-magnifying-glass text-slate-500 text-xl ml-2"></i>
+            </div>
+        </div>
+
+        <!-- Table Section -->
+        <div class="bg-slate-900/40 rounded-2xl border border-slate-800/80 overflow-hidden backdrop-blur-sm neon-border">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-800 bg-slate-950/80 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                            <th class="py-4 px-6">Minecraft ID</th>
+                            <th class="py-4 px-6 text-center">NameMC Searches</th>
+                            <th class="py-4 px-6">Drop Time (JST)</th>
+                            <th class="py-4 px-6 text-right">Time Remaining</th>
+                            <th class="py-4 px-6 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="drop-table-body" class="divide-y divide-slate-800/60 text-sm">
+                        <!-- JSでここに動的に行が挿入されます -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 border border-cyan-500/50 text-cyan-400 px-4 py-3 rounded-xl opacity-0 pointer-events-none transition-all duration-300 flex items-center space-x-2 shadow-lg shadow-cyan-500/5">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-msg">コピーしました</span>
     </div>
 
-    <div class="glass rounded-2xl px-5 py-3 flex items-center gap-3 glow">
-      <div class="w-3 h-3 rounded-full bg-green-400 pulse-dot"></div>
-      <span class="text-sm text-gray-300">LIVE TRACKING</span>
-    </div>
-  </header>
+    <!-- Logic Script -->
+    <script>
+        // 本番環境を想定したモックデータ（NameMCで検索数が80以上の激レアIDリスト）
+        // ※ 実際の運用時はここをバックエンドAPI等からfetchするように書き換えます。
+        const now = Date.now();
+        const mockDrops = [
+            { id: "xqt", searches: 412, dropTime: now + 45000 },      // 45秒後
+            { id: "k7w", searches: 189, dropTime: now + 120000 },     // 2分後
+            { id: "z_0", searches: 95,  dropTime: now + 340000 },     // 5分40秒後
+            { id: "void", searches: 1250, dropTime: now + 720000 },   // 12分後
+            { id: "luna", searches: 840, dropTime: now + 1500000 },   // 25分後
+            { id: "7z9", searches: 82,  dropTime: now + 3600000 },    // 1時間後
+            { id: "vpx", searches: 110, dropTime: now + 7200000 },    // 2時間後
+            // 検索数80未満のデータ（自動で除外されるかテスト用）
+            { id: "test1234", searches: 12, dropTime: now + 5000 } 
+        ];
 
-  <section class="relative z-10 px-8 py-12">
-    <div class="max-w-7xl mx-auto">
+        // 検索数80以上のデータのみに最初からフィルタリング
+        let targetDrops = mockDrops.filter(item => item.searches >= 80);
 
-      <div class="grid lg:grid-cols-4 gap-5 mb-10">
+        function updateTable() {
+            const tbody = document.getElementById('drop-table-body');
+            const searchQuery = document.getElementById('search-bar').value.toLowerCase();
+            const currentTime = Date.now();
+            
+            // 検索バーのフィルター適用
+            const filteredData = targetDrops.filter(item => item.id.toLowerCase().includes(searchQuery));
+            
+            // トータルカウント更新
+            document.getElementById('total-count').innerText = filteredData.length;
 
-        <div class="glass rounded-3xl p-6 glow card-hover">
-          <p class="text-gray-400 text-sm">Tracked Names</p>
-          <h2 id="trackedCount" class="text-4xl font-bold mt-2">0</h2>
-        </div>
+            // 時間順にソート
+            filteredData.sort((a, b) => a.dropTime - b.dropTime);
 
-        <div class="glass rounded-3xl p-6 glow card-hover">
-          <p class="text-gray-400 text-sm">Search Score 80+</p>
-          <h2 id="highScoreCount" class="text-4xl font-bold mt-2">0</h2>
-        </div>
+            tbody.innerHTML = '';
 
-        <div class="glass rounded-3xl p-6 glow card-hover">
-          <p class="text-gray-400 text-sm">Dropping Today</p>
-          <h2 id="todayCount" class="text-4xl font-bold mt-2">0</h2>
-        </div>
+            if(filteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-slate-500">条件に一致するレアIDが見つかりません</td></tr>`;
+                return;
+            }
 
-        <div class="glass rounded-3xl p-6 glow card-hover">
-          <p class="text-gray-400 text-sm">HOTTEST</p>
-          <h2 id="topName" class="text-4xl font-bold mt-2 neon">---</h2>
-        </div>
+            filteredData.forEach(item => {
+                const timeLeft = item.dropTime - currentTime;
+                
+                let timeStr = "";
+                let rowStatusClass = "";
 
-      </div>
+                if (timeLeft <= 0) {
+                    timeStr = `<span class="text-emerald-400 font-bold animate-pulse">AVAILABLE NOW</span>`;
+                    rowStatusClass = "bg-emerald-950/10";
+                } else {
+                    const hours = Math.floor(timeLeft / 3600000);
+                    const minutes = Math.floor((timeLeft % 3600000) / 60000);
+                    const seconds = Math.floor((timeLeft % 60000) / 1000);
+                    
+                    timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    if(timeLeft < 60000) {
+                        timeStr = `<span class="text-rose-400 font-bold">${timeStr}</span>`; // 1分未満は赤文字
+                    }
+                }
 
-      <div class="glass rounded-3xl p-6 mb-8">
-        <div class="flex flex-col lg:flex-row gap-4 justify-between items-center">
+                // 日時のフォーマット (JST)
+                const dateObj = new Date(item.dropTime);
+                const formatJST = `${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}:${dateObj.getSeconds().toString().padStart(2, '0')}`;
 
-          <input
-            id="searchInput"
-            type="text"
-            placeholder="Search names..."
-            class="w-full lg:w-[300px] bg-black/30 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-purple-500"
-          />
+                // 検索数に応じたバッジの色
+                let searchBadge = `<span class="px-2.5 py-1 rounded-md bg-slate-950 text-slate-400 border border-slate-800 mono">${item.searches}</span>`;
+                if(item.searches >= 500) {
+                    searchBadge = `<span class="px-2.5 py-1 rounded-md bg-cyan-950/60 text-cyan-400 border border-cyan-500/30 font-bold mono"><i class="fa-solid fa-fire mr-1"></i> ${item.searches}</span>`;
+                }
 
-          <div class="flex gap-3 flex-wrap">
-            <button onclick="filterType('ALL')" class="filter-btn px-4 py-2 rounded-xl glass">ALL</button>
-            <button onclick="filterType('3L')" class="filter-btn px-4 py-2 rounded-xl glass">3L</button>
-            <button onclick="filterType('4L')" class="filter-btn px-4 py-2 rounded-xl glass">4L</button>
-            <button onclick="filterType('WORD')" class="filter-btn px-4 py-2 rounded-xl glass">WORD</button>
-            <button onclick="filterType('OG')" class="filter-btn px-4 py-2 rounded-xl glass">OG</button>
-          </div>
+                const row = document.createElement('tr');
+                row.className = `hover:bg-slate-800/30 transition-colors ${rowStatusClass}`;
+                row.innerHTML = `
+                    <td class="py-4 px-6 font-bold text-white tracking-wide text-base">${item.id}</td>
+                    <td class="py-4 px-6 text-center">${searchBadge}</td>
+                    <td class="py-4 px-6 text-slate-400 mono">${formatJST}</td>
+                    <td class="py-4 px-6 text-right font-bold mono text-cyan-400">${timeStr}</td>
+                    <td class="py-4 px-6 text-center">
+                        <button onclick="copyToClipboard('${item.id}')" class="text-xs bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-slate-300 px-3 py-1.5 rounded-lg transition-all font-semibold">
+                            <i class="fa-regular fa-copy"></i> Copy
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
 
-        </div>
-      </div>
+        // コピー機能
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('toast');
+                document.getElementById('toast-msg').innerText = `"${text}" をクリップボードにコピーしました`;
+                toast.style.opacity = '1';
+                toast.style.pointerEvents = 'auto';
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.pointerEvents = 'none';
+                }, 2500);
+            });
+        }
 
-      <div class="overflow-auto glass rounded-3xl glow">
-        <table class="w-full min-w-[1000px]">
-          <thead>
-            <tr class="border-b border-white/10 text-gray-400 text-left">
-              <th class="p-5">NAME</th>
-              <th class="p-5">TYPE</th>
-              <th class="p-5">SEARCH SCORE</th>
-              <th class="p-5">STATUS</th>
-              <th class="p-5">DROP TIME</th>
-              <th class="p-5">COUNTDOWN</th>
-              <th class="p-5">NameMC</th>
-            </tr>
-          </thead>
+        // 1秒ごとにカウントダウンと表示を更新
+        setInterval(updateTable, 1000);
+        document.getElementById('search-bar').addEventListener('input', updateTable);
 
-          <tbody id="tableBody"></tbody>
-        </table>
-      </div>
-
-    </div>
-  </section>
-
-  <script>
-
-    const names = [
-      {
-        name: 'ymc',
-        type: '3L',
-        searches: 222,
-        drop: Date.now() + 1000 * 60 * 45,
-        status: 'HOT'
-      },
-      {
-        name: 'void',
-        type: 'WORD',
-        searches: 412,
-        drop: Date.now() + 1000 * 60 * 60 * 6,
-        status: 'TRACKED'
-      },
-      {
-        name: 'w7d',
-        type: '3L',
-        searches: 183,
-        drop: Date.now() + 1000 * 60 * 8,
-        status: 'SOON'
-      },
-      {
-        name: 'rune',
-        type: 'OG',
-        searches: 305,
-        drop: Date.now() + 1000 * 60 * 60 * 20,
-        status: 'OG'
-      },
-      {
-        name: 'h4x',
-        type: '3L',
-        searches: 98,
-        drop: Date.now() + 1000 * 60 * 60 * 2,
-        status: 'LIVE'
-      },
-      {
-        name: 'ghost',
-        type: 'WORD',
-        searches: 501,
-        drop: Date.now() + 1000 * 60 * 60 * 30,
-        status: 'INSANE'
-      },
-      {
-        name: 'zxq9',
-        type: '4L',
-        searches: 84,
-        drop: Date.now() + 1000 * 60 * 60 * 11,
-        status: 'TRACKED'
-      },
-      {
-        name: 'envy',
-        type: 'OG',
-        searches: 284,
-        drop: Date.now() + 1000 * 60 * 3,
-        status: 'HOT'
-      }
-    ];
-
-    let currentFilter = 'ALL';
-
-    const tableBody = document.getElementById('tableBody');
-    const searchInput = document.getElementById('searchInput');
-
-    function countdown(ms) {
-      const total = Math.floor(ms / 1000);
-
-      const d = Math.floor(total / 86400);
-      const h = Math.floor((total % 86400) / 3600);
-      const m = Math.floor((total % 3600) / 60);
-      const s = total % 60;
-
-      return `${d}d ${h}h ${m}m ${s}s`;
-    }
-
-    function render() {
-      const keyword = searchInput.value.toLowerCase();
-
-      let filtered = names.filter(item => {
-        const matchesFilter = currentFilter === 'ALL' || item.type === currentFilter;
-        const matchesSearch = item.name.toLowerCase().includes(keyword);
-
-        return matchesFilter && matchesSearch;
-      });
-
-      filtered = filtered.sort((a,b)=> b.searches - a.searches);
-
-      tableBody.innerHTML = '';
-
-      filtered.forEach(item => {
-
-        const row = document.createElement('tr');
-
-        row.className = 'border-b border-white/5 hover:bg-white/5 transition';
-
-        row.innerHTML = `
-          <td class="p-5">
-            <div class="font-bold text-xl neon">${item.name}</div>
-          </td>
-
-          <td class="p-5">
-            <span class="glass px-3 py-2 rounded-xl text-sm">
-              ${item.type}
-            </span>
-          </td>
-
-          <td class="p-5">
-            <span class="text-purple-300 font-bold">
-              ${item.searches}
-            </span>
-          </td>
-
-          <td class="p-5">
-            <span class="px-3 py-2 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/20 text-sm">
-              ${item.status}
-            </span>
-          </td>
-
-          <td class="p-5 text-gray-300">
-            ${new Date(item.drop).toLocaleString()}
-          </td>
-
-          <td class="p-5 font-bold text-green-300">
-            ${countdown(item.drop - Date.now())}
-          </td>
-
-          <td class="p-5">
-            <a
-              href="https://namemc.com/search?q=${item.name}"
-              target="_blank"
-              class="px-4 py-2 rounded-xl bg-white/10 hover:bg-purple-500/30 transition"
-            >
-              Open
-            </a>
-          </td>
-        `;
-
-        tableBody.appendChild(row);
-      });
-
-      updateStats(filtered);
-    }
-
-    function updateStats(list) {
-      document.getElementById('trackedCount').innerText = names.length;
-
-      document.getElementById('highScoreCount').innerText = names.filter(x => x.searches >= 80).length;
-
-      document.getElementById('todayCount').innerText = names.filter(x => x.drop - Date.now() < 86400000).length;
-
-      const top = [...names].sort((a,b)=> b.searches - a.searches)[0];
-      document.getElementById('topName').innerText = top.name;
-    }
-
-    function filterType(type) {
-      currentFilter = type;
-      render();
-    }
-
-    searchInput.addEventListener('input', render);
-
-    setInterval(render, 1000);
-
-    render();
-
-    // ===== FAKE LIVE UPDATES =====
-
-    setInterval(() => {
-      names.forEach(name => {
-        const random = Math.floor(Math.random() * 5);
-        name.searches += random;
-      });
-    }, 5000);
-
-  </script>
-
+        // 初回読み込み
+        updateTable();
+    </script>
 </body>
 </html>
