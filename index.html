@@ -1,173 +1,125 @@
-import { useState } from "react";
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stake Blue Casino</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#06111f] text-white overflow-hidden min-h-screen">
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(0,140,255,0.25),transparent_35%),radial-gradient(circle_at_bottom,rgba(0,255,200,0.15),transparent_30%)]"></div>
 
-export default function CasinoLandingPage() {
-  const slotIcons = ["💎", "7️⃣", "🔥", "⚡", "🎰", "🪙"];
+  <header class="relative z-10 flex items-center justify-between px-8 py-6 border-b border-cyan-400/10 backdrop-blur-xl">
+    <div>
+      <h1 class="text-4xl font-black tracking-[0.2em] text-cyan-300">
+        STAKE BLUE
+      </h1>
+      <p class="text-sm text-cyan-100/60 mt-1">
+        FUTURISTIC CASINO EXPERIENCE
+      </p>
+    </div>
 
-  const [slots, setSlots] = useState(["💎", "7️⃣", "🔥"]);
-  const [coins, setCoins] = useState(1000);
-  const [message, setMessage] = useState("READY TO SPIN");
+    <div class="flex items-center gap-4">
+      <div id="coinBox" class="rounded-2xl bg-cyan-400/10 border border-cyan-400/20 px-5 py-3 text-cyan-200 font-bold">
+        💰 1000 COINS
+      </div>
 
-  const spinSlots = () => {
-    if (coins < 50) {
-      setMessage("NOT ENOUGH COINS");
-      return;
-    }
+      <button class="rounded-2xl bg-cyan-400 px-6 py-3 text-black font-black shadow-2xl shadow-cyan-500/30">
+        LOGIN
+      </button>
+    </div>
+  </header>
 
-    const result = [
-      slotIcons[Math.floor(Math.random() * slotIcons.length)],
-      slotIcons[Math.floor(Math.random() * slotIcons.length)],
-      slotIcons[Math.floor(Math.random() * slotIcons.length)],
-    ];
-
-    setSlots(result);
-    setCoins((prev) => prev - 50);
-
-    if (result[0] === result[1] && result[1] === result[2]) {
-      setCoins((prev) => prev + 500);
-      setMessage("🎉 JACKPOT +500");
-    } else if (
-      result[0] === result[1] ||
-      result[1] === result[2] ||
-      result[0] === result[2]
-    ) {
-      setCoins((prev) => prev + 120);
-      setMessage("✨ NICE WIN +120");
-    } else {
-      setMessage("TRY AGAIN");
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-[#06111f] text-white overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(0,140,255,0.25),transparent_35%),radial-gradient(circle_at_bottom,rgba(0,255,200,0.15),transparent_30%)]" />
-
-      <header className="relative z-10 flex items-center justify-between px-8 py-6 border-b border-cyan-400/10 backdrop-blur-xl">
-        <div>
-          <h1 className="text-4xl font-black tracking-[0.2em] text-cyan-300">
-            STAKE BLUE
-          </h1>
-          <p className="text-sm text-cyan-100/60 mt-1">
-            FUTURISTIC CASINO EXPERIENCE
-          </p>
+  <main class="relative z-10 max-w-7xl mx-auto px-8 py-14">
+    <section class="grid lg:grid-cols-2 gap-10 items-center">
+      <div>
+        <div class="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-5 py-2 text-cyan-300 font-bold mb-8">
+          ⚡ LIVE CASINO MODE
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="rounded-2xl bg-cyan-400/10 border border-cyan-400/20 px-5 py-3 text-cyan-200 font-bold">
-            💰 {coins} COINS
-          </div>
+        <h2 class="text-6xl md:text-7xl font-black leading-none">
+          PLAY.
+          <span class="block text-cyan-300">WIN.</span>
+          <span class="block text-white/80">REPEAT.</span>
+        </h2>
 
-          <button className="rounded-2xl bg-cyan-400 px-6 py-3 text-black font-black hover:scale-105 transition-transform shadow-2xl shadow-cyan-500/30">
-            LOGIN
+        <p class="mt-8 text-xl text-cyan-50/70 max-w-xl leading-relaxed">
+          Stake風の青ネオンカジノUI。HTMLだけで動くスロットゲーム付き。
+        </p>
+
+        <div class="flex gap-5 mt-10">
+          <button onclick="spinSlots()" class="rounded-2xl bg-cyan-400 px-10 py-5 text-black font-black text-xl shadow-2xl shadow-cyan-400/40 hover:scale-105 transition-transform">
+            SPIN NOW
+          </button>
+
+          <button class="rounded-2xl border border-cyan-400/20 bg-white/5 backdrop-blur-xl px-10 py-5 font-bold hover:bg-cyan-400/10 transition">
+            LIVE TABLES
           </button>
         </div>
-      </header>
+      </div>
 
-      <main className="relative z-10 max-w-7xl mx-auto px-8 py-14">
-        <section className="grid lg:grid-cols-2 gap-10 items-center">
+      <div class="rounded-[2rem] border border-cyan-400/20 bg-[#0d1b2d]/80 backdrop-blur-2xl p-8 shadow-[0_0_60px_rgba(0,200,255,0.15)]">
+        <div class="flex items-center justify-between mb-8">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-5 py-2 text-cyan-300 font-bold mb-8">
-              ⚡ LIVE CASINO MODE
-            </div>
-
-            <h2 className="text-6xl md:text-7xl font-black leading-none">
-              PLAY.
-              <span className="block text-cyan-300">
-                WIN.
-              </span>
-              <span className="block text-white/80">
-                REPEAT.
-              </span>
-            </h2>
-
-            <p className="mt-8 text-xl text-cyan-50/70 max-w-xl leading-relaxed">
-              A sleek blue neon casino inspired by Stake-style interfaces with
-              real interactive slot gameplay and futuristic UI effects.
-            </p>
-
-            <div className="flex gap-5 mt-10">
-              <button
-                onClick={spinSlots}
-                className="rounded-2xl bg-cyan-400 px-10 py-5 text-black font-black text-xl hover:scale-105 transition-transform shadow-2xl shadow-cyan-400/40"
-              >
-                SPIN NOW
-              </button>
-
-              <button className="rounded-2xl border border-cyan-400/20 bg-white/5 backdrop-blur-xl px-10 py-5 font-bold hover:bg-cyan-400/10 transition">
-                LIVE TABLES
-              </button>
-            </div>
+            <h3 class="text-3xl font-black text-cyan-300">SLOT MACHINE</h3>
+            <p class="text-cyan-100/50 mt-2">BET: 50 COINS</p>
           </div>
 
-          <div className="rounded-[2rem] border border-cyan-400/20 bg-[#0d1b2d]/80 backdrop-blur-2xl p-8 shadow-[0_0_60px_rgba(0,200,255,0.15)]">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h3 className="text-3xl font-black text-cyan-300">
-                  SLOT MACHINE
-                </h3>
-                <p className="text-cyan-100/50 mt-2">BET: 50 COINS</p>
-              </div>
-
-              <div className="rounded-xl bg-cyan-400/10 px-4 py-2 text-cyan-200 font-bold border border-cyan-400/20">
-                {message}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-5">
-              {slots.map((slot, index) => (
-                <div
-                  key={index}
-                  className="aspect-square rounded-3xl bg-[#13263f] border border-cyan-400/20 flex items-center justify-center text-6xl shadow-inner"
-                >
-                  {slot}
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={spinSlots}
-              className="mt-8 w-full rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 py-5 text-xl font-black text-black hover:brightness-110 transition shadow-2xl"
-            >
-              🎰 SPIN THE MACHINE
-            </button>
+          <div id="message" class="rounded-xl bg-cyan-400/10 px-4 py-2 text-cyan-200 font-bold border border-cyan-400/20">
+            READY TO SPIN
           </div>
-        </section>
+        </div>
 
-        <section className="grid md:grid-cols-3 gap-6 mt-20">
-          <div className="rounded-3xl bg-[#0d1b2d]/70 border border-cyan-400/10 p-8 backdrop-blur-xl hover:-translate-y-2 transition-transform">
-            <div className="text-5xl mb-5">⚡</div>
-            <h3 className="text-2xl font-black text-cyan-300">
-              INSTANT PLAY
-            </h3>
-            <p className="mt-4 text-cyan-50/60 leading-relaxed">
-              Fast animations and smooth gameplay inspired by modern crypto
-              casino platforms.
-            </p>
-          </div>
+        <div class="grid grid-cols-3 gap-5">
+          <div id="slot1" class="aspect-square rounded-3xl bg-[#13263f] border border-cyan-400/20 flex items-center justify-center text-6xl shadow-inner">💎</div>
+          <div id="slot2" class="aspect-square rounded-3xl bg-[#13263f] border border-cyan-400/20 flex items-center justify-center text-6xl shadow-inner">7️⃣</div>
+          <div id="slot3" class="aspect-square rounded-3xl bg-[#13263f] border border-cyan-400/20 flex items-center justify-center text-6xl shadow-inner">🔥</div>
+        </div>
 
-          <div className="rounded-3xl bg-[#0d1b2d]/70 border border-cyan-400/10 p-8 backdrop-blur-xl hover:-translate-y-2 transition-transform">
-            <div className="text-5xl mb-5">💎</div>
-            <h3 className="text-2xl font-black text-cyan-300">
-              BIG REWARDS
-            </h3>
-            <p className="mt-4 text-cyan-50/60 leading-relaxed">
-              Win jackpots, stack coins, and keep spinning for huge bonus
-              payouts.
-            </p>
-          </div>
+        <button onclick="spinSlots()" class="mt-8 w-full rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 py-5 text-xl font-black text-black hover:brightness-110 transition shadow-2xl">
+          🎰 SPIN THE MACHINE
+        </button>
+      </div>
+    </section>
+  </main>
 
-          <div className="rounded-3xl bg-[#0d1b2d]/70 border border-cyan-400/10 p-8 backdrop-blur-xl hover:-translate-y-2 transition-transform">
-            <div className="text-5xl mb-5">🌐</div>
-            <h3 className="text-2xl font-black text-cyan-300">
-              LIVE EXPERIENCE
-            </h3>
-            <p className="mt-4 text-cyan-50/60 leading-relaxed">
-              Premium blue neon visuals with immersive futuristic casino design.
-            </p>
-          </div>
-        </section>
-      </main>
-    </div>
-  );
-}
+  <script>
+    const icons = ["💎", "7️⃣", "🔥", "⚡", "🎰", "🪙"];
+    let coins = 1000;
 
+    function randomIcon() {
+      return icons[Math.floor(Math.random() * icons.length)];
+    }
 
+    function spinSlots() {
+      if (coins < 50) {
+        document.getElementById("message").innerText = "NOT ENOUGH COINS";
+        return;
+      }
+
+      coins -= 50;
+
+      const s1 = randomIcon();
+      const s2 = randomIcon();
+      const s3 = randomIcon();
+
+      document.getElementById("slot1").innerText = s1;
+      document.getElementById("slot2").innerText = s2;
+      document.getElementById("slot3").innerText = s3;
+
+      let message = "TRY AGAIN";
+
+      if (s1 === s2 && s2 === s3) {
+        coins += 500;
+        message = "🎉 JACKPOT +500";
+      } else if (s1 === s2 || s2 === s3 || s1 === s3) {
+        coins += 120;
+        message = "✨ NICE WIN +120";
+      }
+
+      document.getElementById("message").innerText = message;
+      document.getElementById("coinBox").innerText = `💰 ${coins} COINS`;
+    }
+  </script>
+</body>
+</html>
