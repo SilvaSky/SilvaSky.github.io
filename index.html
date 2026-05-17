@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>HTML5 クラフトゲーム Pro</title>
+    <title>HTML5 クラフトゲーム Pro (モード切替版)</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; touch-action: none; }
         body, html { width: 100%; height: 100%; overflow: hidden; background: #87CEEB; font-family: sans-serif; user-select: none; }
@@ -42,28 +42,23 @@
             border: 1px solid rgba(0,0,0,0.15);
         }
 
-        /* --- 各ブロックのテクスチャ色（ドット絵風グラデーション） --- */
-        /* 1. 草ブロック */
+        /* --- 各ブロックのテクスチャ色 --- */
         .grass .front  { background: #557a2b; } .grass .back   { background: #4d6e27; }
         .grass .left   { background: #456323; } .grass .right  { background: #456323; }
         .grass .top    { background: #71a03c; } .grass .bottom { background: #2c3e16; }
 
-        /* 2. 土ブロック */
         .dirt .front  { background: #866043; } .dirt .back   { background: #735239; }
         .dirt .left   { background: #674933; } .dirt .right  { background: #674933; }
         .dirt .top    { background: #866043; } .dirt .bottom { background: #4d3626; }
 
-        /* 3. 石ブロック */
         .stone .front  { background: #737373; } .stone .back   { background: #666666; }
         .stone .left   { background: #595959; } .stone .right  { background: #595959; }
         .stone .top    { background: #808080; } .stone .bottom { background: #404040; }
 
-        /* 4. 木ブロック */
         .wood .front  { background: #a67a53; } .wood .back   { background: #946d4a; }
         .wood .left   { background: #825f40; } .wood .right  { background: #825f40; }
         .wood .top    { background: #bf8d60; } .wood .bottom { background: #59412c; }
 
-        /* 5. レンガブロック */
         .brick .front  { background: #b35946; border: 2px dashed #d98c7e; }
         .brick .back   { background: #9e4f3e; border: 2px dashed #d98c7e; }
         .brick .left   { background: #8a4536; border: 2px dashed #d98c7e; }
@@ -90,7 +85,7 @@
             z-index: 10;
         }
 
-        /* 下部ブロック選択スロット（スマホ対応） */
+        /* 下部ブロック選択スロット */
         #hotbar {
             position: absolute;
             bottom: 20px;
@@ -118,16 +113,46 @@
         .icon.stone { background: #808080; }
         .icon.wood  { background: #bf8d60; }
         .icon.brick { background: #c7634e; }
+
+        /* ★スマホ用モード切り替えボタン */
+        #mode-toggle {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            cursor: pointer;
+            z-index: 15;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        /* 破壊モード（赤） */
+        .mode-break { background: #ff4d4d; }
+        /* 建築モード（緑） */
+        .mode-build { background: #2ecc71; }
     </style>
 </head>
 <body>
 
     <div id="ui">
-        <strong>HTML5 クラフトゲーム (スマホ対応版)</strong><br>
-        ・画面スワイプ / ドラッグ: 視点回転<br>
-        ・タップ / クリック: ブロックを【破壊】<br>
-        ・長押し / Shift+クリック: ブロックを【設置】
+        <strong>HTML5 クラフトゲーム (スマホUI最適化版)</strong><br>
+        【PC】クリック: 破壊 / Shift+クリック: 設置<br>
+        【スマホ】右下のボタンで<b>「はかい」</b>と<b>「けんちく」</b>を切り替えてタップ！
     </div>
+
+    <!-- スマホ用モード切替ボタン -->
+    <button id="mode-toggle" class="mode-break">
+        <span id="mode-text">はかい</span>
+        <span>モード</span>
+    </button>
 
     <!-- 下部のアイテムスロット -->
     <div id="hotbar">
@@ -145,10 +170,15 @@
     <script>
         const world = document.getElementById('world');
         const slots = document.querySelectorAll('.slot');
+        const modeToggle = document.getElementById('mode-toggle');
+        const modeText = document.getElementById('mode-text');
         
         const BLOCK_SIZE = 40;
         const WORLD_SIZE = 8; 
-        let blockType = 'grass'; // 選択中のブロック
+        let blockType = 'grass'; 
+        
+        // スマホ用の現在の操作モード ('break' または 'build')
+        let mobileMode = 'break';
 
         // カメラ（視点）
         let rotX = -25; let rotY = 45;
@@ -159,7 +189,8 @@
         let prevX = 0; let prevY = 0;
 
         function startPan(x, y, target) {
-            if (target.classList.contains('face') || target.closest('#hotbar')) return;
+            // ブロックの面、スロット、モードボタンの上では視点移動を発動させない
+            if (target.classList.contains('face') || target.closest('#hotbar') || target.closest('#mode-toggle')) return;
             isDragging = true;
             prevX = x; prevY = y;
         }
@@ -178,7 +209,7 @@
         window.addEventListener('mousemove', (e) => movePan(e.clientX, e.clientY));
         window.addEventListener('mouseup', endPan);
 
-        // タッチイベント (スマホ・タブレット用)
+        // タッチイベント (スマホ用)
         window.addEventListener('touchstart', (e) => {
             const t = e.touches[0];
             startPan(t.clientX, t.clientY, e.target);
@@ -194,12 +225,33 @@
             world.style.transform = `translate3d(${panX}px, 100px, ${panZ}px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
         }
 
-        // 下部ホットバーのクリックイベント切り替え
+        // スマホ用モード切り替えボタンの処理
+        function toggleMode() {
+            if (mobileMode === 'break') {
+                mobileMode = 'build';
+                modeText.innerText = 'けんちく';
+                modeToggle.className = 'mode-build';
+            } else {
+                mobileMode = 'break';
+                modeText.innerText = 'はかい';
+                modeToggle.className = 'mode-break';
+            }
+        }
+        modeToggle.addEventListener('click', toggleMode);
+        modeToggle.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+            toggleMode();
+        });
+
+        // 下部ホットバーの切り替え
         slots.forEach(slot => {
             const selectType = () => {
                 slots.forEach(s => s.classList.remove('active'));
                 slot.classList.add('active');
                 blockType = slot.dataset.type;
+                
+                // ブロックを選んだら自動的に建築モードにしてあげると親切
+                if (mobileMode === 'break') toggleMode();
             };
             slot.addEventListener('click', selectType);
             slot.addEventListener('touchstart', (e) => { e.stopPropagation(); selectType(); });
@@ -211,16 +263,13 @@
             cube.className = `cube ${type}`;
             cube.style.transform = `translate3d(${x * BLOCK_SIZE}px, ${-y * BLOCK_SIZE}px, ${z * BLOCK_SIZE}px)`;
 
-            let touchTimer = null;
-            let isLongPress = false;
-
             const faces = ['front', 'back', 'left', 'right', 'top', 'bottom'];
             faces.forEach(faceName => {
                 const face = document.createElement('div');
                 face.className = `face ${faceName}`;
                 cube.appendChild(face);
 
-                // ブロック設置アクション
+                // 設置の共通処理
                 const placeBlock = () => {
                     let nx = x, ny = y, nz = z;
                     if (faceName === 'front')  nz++;
@@ -232,38 +281,33 @@
                     createCube(nx, ny, nz, blockType);
                 };
 
-                // PC用: クリック判定（通常＝破壊、Shift＝設置）
+                // PC用: クリック判定（通常クリック＝破壊、Shift+クリック＝設置）
                 face.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (e.shiftKey) placeBlock();
-                    else cube.remove();
-                });
-
-                // スマホ用: タップで破壊、長押し（500ms）で設置
-                face.addEventListener('touchstart', (e) => {
-                    e.stopPropagation();
-                    isLongPress = false;
-                    touchTimer = setTimeout(() => {
-                        isLongPress = true;
-                        placeBlock(); // 長押しで設置
-                    }, 500); 
-                });
-
-                face.addEventListener('touchend', (e) => {
-                    e.stopPropagation();
-                    clearTimeout(touchTimer);
-                    if (!isLongPress) {
-                        cube.remove(); // 短いタップなら破壊
+                    // PC環境かどうかの簡易チェック（Shiftキー判定、またはタッチモードボタンを無視する場合）
+                    if (e.shiftKey) {
+                        placeBlock();
+                    } else {
+                        cube.remove();
                     }
                 });
 
-                face.addEventListener('touchmove', () => clearTimeout(touchTimer));
+                // スマホ用: タッチ操作（現在のモードボタンの状態に応じて1発で切り替え）
+                face.addEventListener('touchstart', (e) => {
+                    e.stopPropagation();
+                    
+                    if (mobileMode === 'build') {
+                        placeBlock(); // 建築モードなら即設置
+                    } else {
+                        cube.remove(); // 破壊モードなら即削除
+                    }
+                });
             });
 
             world.appendChild(cube);
         }
 
-        // 初期マップ生成（2層構造）
+        // 初期マップ生成
         function initMap() {
             for (let x = -WORLD_SIZE/2; x < WORLD_SIZE/2; x++) {
                 for (let z = -WORLD_SIZE/2; z < WORLD_SIZE/2; z++) {
