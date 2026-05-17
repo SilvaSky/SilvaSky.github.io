@@ -3,702 +3,295 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYBER BOWLING 3D - DRAG EDITION</title>
+    <title>PRO DESIGN | Premium Portfolio</title>
     <style>
-        :root {
-            --neon-blue: #00f3ff;
-            --neon-pink: #ff007f;
-            --neon-purple: #9d00ff;
-            --bg-dark: #0a0a16;
-        }
-
+        /* --- リセット & 基本設定 --- */
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            user-select: none; /* ドラッグ時のテキスト選択を防止 */
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif;
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: #fff;
+            background-color: #0d0d0d;
+            color: #ffffff;
+            line-height: 1.6;
             overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            background: radial-gradient(circle at center, #1a1a3a 0%, #050510 100%);
         }
 
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+        }
+
+        /* --- ヘッダー --- */
         header {
-            text-align: center;
-            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            color: #fff;
-            text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), 0 0 40px var(--neon-purple);
-            animation: pulse 2s infinite alternate;
-        }
-
-        @keyframes pulse {
-            from { transform: scale(0.98); text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-purple); }
-            to { transform: scale(1.02); text-shadow: 0 0 15px var(--neon-pink), 0 0 30px var(--neon-blue); }
-        }
-
-        /* ゲームステージ(3D空間) */
-        .game-container {
-            position: relative;
-            width: 800px;
-            height: 450px;
-            background: #000;
-            border: 4px solid #111;
-            border-image: linear-gradient(to right, var(--neon-blue), var(--neon-pink)) 1;
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
-            overflow: hidden;
-            perspective: 400px;
-            touch-action: none; /* スマホのスクロールを無効化 */
-        }
-
-        /* 3Dの舞台 */
-        .stage {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            transform-style: preserve-3d;
-        }
-
-        /* ボウリングレーン */
-        .lane {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            width: 200px;
-            height: 800px;
-            background: linear-gradient(to top, #111 0%, #222 50%, #050505 100%);
-            border-left: 4px solid var(--neon-blue);
-            border-right: 4px solid var(--neon-blue);
-            box-shadow: inset 0 0 20px rgba(0, 243, 255, 0.5);
-            transform: translateX(-50%) rotateX(80deg);
-            transform-origin: bottom center;
-        }
-
-        .lane::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent 49%, var(--neon-purple) 50%, transparent 51%);
-            background-size: 40px 100%;
-            opacity: 0.3;
-        }
-
-        /* ピンの配置エリア */
-        .pin-deck {
-            position: absolute;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 120px;
-            height: 60px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            transform-style: preserve-3d;
-        }
-
-        /* ピンのデザイン */
-        .pin {
-            position: absolute;
-            width: 14px;
-            height: 35px;
-            background: linear-gradient(to bottom, #fff 70%, #ff0000 75%, #ff0000 85%, #fff 90%);
-            border-radius: 7px 7px 4px 4px;
-            box-shadow: 0 0 10px rgba(255,255,255,0.8);
-            bottom: 0;
-            transform-origin: bottom center;
-            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.6s;
-        }
-
-        .pin-1  { left: 53px; bottom: 0px;  z-index: 10; }
-        .pin-2  { left: 38px; bottom: 12px; z-index: 9; }
-        .pin-3  { left: 68px; bottom: 12px; z-index: 9; }
-        .pin-4  { left: 23px; bottom: 24px; z-index: 8; }
-        .pin-5  { left: 53px; bottom: 24px; z-index: 8; }
-        .pin-6  { left: 83px; bottom: 24px; z-index: 8; }
-        .pin-7  { left: 8px;  bottom: 36px; z-index: 7; }
-        .pin-8  { left: 38px; bottom: 36px; z-index: 7; }
-        .pin-9  { left: 68px; bottom: 36px; z-index: 7; }
-        .pin-10 { left: 98px; bottom: 36px; z-index: 7; }
-
-        .pin.hit-left {
-            transform: translateY(-20px) rotateZ(-90deg) rotateX(-45deg) scale(0.5);
-            opacity: 0;
-        }
-        .pin.hit-right {
-            transform: translateY(-20px) rotateZ(90deg) rotateX(45deg) scale(0.5);
-            opacity: 0;
-        }
-
-        /* ボール（初期位置を調整可能に） */
-        .ball {
-            position: absolute;
-            bottom: 40px;
-            left: 383px; /* (800 - 34) / 2 */
-            width: 34px;
-            height: 34px;
-            background: radial-gradient(circle at 30% 30%, var(--neon-pink), #400020 80%);
-            border-radius: 50%;
-            box-shadow: 0 0 15px var(--neon-pink), inset -3px -3px 10px rgba(0,0,0,0.8);
-            z-index: 100;
-            cursor: grab;
-        }
-
-        .ball:active {
-            cursor: grabbing;
-        }
-
-        /* ガイド表示 */
-        .instruction {
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: #aaa;
-            letter-spacing: 1px;
-        }
-        .instruction strong {
-            color: var(--neon-blue);
-        }
-
-        .strike-alert {
-            position: absolute;
-            top: 40%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            font-size: 4rem;
-            font-weight: 900;
-            color: #fff;
-            text-shadow: 0 0 20px var(--neon-pink), 0 0 40px var(--neon-pink);
-            font-style: italic;
-            z-index: 200;
-            pointer-events: none;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .strike-alert.show {
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        /* スコアボード */
-        .scoreboard-container {
-            width: 800px;
-            margin-top: 25px;
-            background: rgba(10, 10, 25, 0.8);
-            border: 2px solid var(--neon-purple);
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(157, 0, 255, 0.15);
-        }
-
-        .scoreboard-header {
+            padding: 20px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 5px;
+            z-index: 1000;
+            background: rgba(13, 13, 13, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .player-info {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--neon-blue);
-        }
-
-        .total-score-display {
+        .logo {
             font-size: 1.5rem;
             font-weight: 900;
-            color: var(--neon-pink);
-            text-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(45deg, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .score-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: center;
-        }
-
-        .score-table th {
-            background: rgba(157, 0, 255, 0.2);
-            color: #ccc;
-            font-size: 0.8rem;
-            padding: 6px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .score-table td {
-            border: 1px solid rgba(255,255,255,0.1);
-            height: 45px;
-            min-width: 60px;
-        }
-
-        .shots {
+        .nav-links {
             display: flex;
-            height: 22px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            list-style: none;
+            gap: 30px;
         }
 
-        .shot {
-            flex: 1;
-            height: 100%;
+        .nav-links a {
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #aaa;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        /* --- ヒーローセクション --- */
+        .hero {
+            height: 100vh;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 0.85rem;
-            font-weight: bold;
+            padding: 0 10%;
+            position: relative;
+            background: radial-gradient(circle at 80% 20%, #1a1a2e 0%, #0d0d0d 60%);
         }
 
-        .shot:not(:last-child) {
-            border-right: 1px solid rgba(255,255,255,0.1);
+        .hero-content {
+            max-width: 600px;
+            z-index: 10;
         }
 
-        .frame-total {
-            height: 23px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1rem;
-            color: var(--neon-blue);
+        .hero-tag {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: #00ffcc;
+            margin-bottom: 20px;
+            display: inline-block;
         }
 
-        .current-frame-box {
-            box-shadow: inset 0 0 8px var(--neon-blue);
-            background: rgba(0, 243, 255, 0.05);
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 30px;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #888;
+            margin-bottom: 40px;
         }
 
         .btn {
-            margin-top: 15px;
-            padding: 10px 25px;
-            background: transparent;
-            border: 2px solid var(--neon-blue);
-            color: var(--neon-blue);
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.3s;
-            border-radius: 4px;
+            display: inline-block;
+            padding: 15px 35px;
+            background-color: #fff;
+            color: #000;
+            font-weight: 700;
+            border-radius: 50px;
+            letter-spacing: 1px;
+            box-shadow: 0 10px 20px rgba(255,255,255,0.1);
         }
 
         .btn:hover {
-            background: var(--neon-blue);
-            color: #000;
-            box-shadow: 0 0 20px var(--neon-blue);
+            background-color: #00ffcc;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0,255,204,0.3);
+        }
+
+        /* --- メインコンテンツ領域 --- */
+        .container {
+            padding: 100px 10%;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 60px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -10px;
+            width: 50px;
+            height: 2px;
+            background-color: #00ffcc;
+        }
+
+        /* --- ワークス（実績）グリッド --- */
+        .works-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+
+        .work-card {
+            background: #161616;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #222;
+        }
+
+        .work-img-box {
+            position: relative;
+            overflow: hidden;
+            padding-top: 66.66%; /* 3:2のアスペクト比 */
+        }
+
+        .work-img-box img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .work-card:hover .work-img-box img {
+            transform: scale(1.08);
+        }
+
+        .work-info {
+            padding: 25px;
+        }
+
+        .work-category {
+            font-size: 0.8rem;
+            color: #00ffcc;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .work-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .work-desc {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* --- フッター --- */
+        footer {
+            background-color: #050505;
+            padding: 60px 10%;
+            text-align: center;
+            border-top: 1px solid #111;
+            color: #444;
+            font-size: 0.9rem;
+        }
+
+        /* --- レスポンシブ（スマホ対応） --- */
+        @media (max-width: 768px) {
+            header { padding: 20px; }
+            .nav-links { display: none; } /* 簡易化のためスマホではナビ隠し */
+            .hero h1 { font-size: 2.5rem; }
+            .container { padding: 60px 5%; }
         }
     </style>
 </head>
 <body>
 
+    <!-- ヘッダー -->
     <header>
-        <h1>Cyber Bowling 3D</h1>
-        <p class="instruction">ボールを<strong>下に引いて、上に勢いよくドラッグ（スワイプ）</strong>して投球！</p>
+        <div class="logo">PRO.DESIGN</div>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#works">Works</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
     </header>
 
-    <div class="game-container" id="gameContainer">
-        <div class="strike-alert" id="strikeAlert">STRIKE!</div>
+    <!-- ヒーローセクション -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <span class="hero-tag">Digital Experience</span>
+            <h1>We Create<br>Future Design.</h1>
+            <p>プロフェッショナルな美しさと、最先端のテクノロジーを融合。あなたのビジネスを次のステージへ導くクリエイティブを提供します。</p>
+            <a href="#works" class="btn">View Our Works</a>
+        </div>
+    </section>
+
+    <!-- ワークスセクション -->
+    <main class="container" id="works">
+        <h2 class="section-title">Selected Works</h2>
         
-        <div class="stage">
-            <div class="lane"></div>
-            
-            <div class="pin-deck" id="pinDeck">
-                <div class="pin pin-1" id="pin-1"></div>
-                <div class="pin pin-2" id="pin-2"></div>
-                <div class="pin pin-3" id="pin-3"></div>
-                <div class="pin pin-4" id="pin-4"></div>
-                <div class="pin pin-5" id="pin-5"></div>
-                <div class="pin pin-6" id="pin-6"></div>
-                <div class="pin pin-7" id="pin-7"></div>
-                <div class="pin pin-8" id="pin-8"></div>
-                <div class="pin pin-9" id="pin-9"></div>
-                <div class="pin pin-10" id="pin-10"></div>
+        <div class="works-grid">
+            <!-- 実績 1 -->
+            <div class="work-card">
+                <div class="work-img-box">
+                    <img src="https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80" alt="WEB DESIGN">
+                </div>
+                <div class="work-info">
+                    <div class="work-category">Web Design</div>
+                    <div class="work-title">Neo Agency Corporate</div>
+                    <div class="work-desc">次世代クリエイティブエージェンシーのコーポレートサイト。</div>
+                </div>
             </div>
 
-            <div class="ball" id="ball"></div>
+            <!-- 実績 2 -->
+            <div class="work-card">
+                <div class="work-img-box">
+                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80" alt="BRANDING">
+                </div>
+                <div class="work-info">
+                    <div class="work-category">Branding</div>
+                    <div class="work-title">Quantum App UI/UX</div>
+                    <div class="work-desc">暗号資産を一元管理するダッシュボードアプリのUI設計。</div>
+                </div>
+            </div>
+
+            <!-- 実績 3 -->
+            <div class="work-card">
+                <div class="work-img-box">
+                    <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80" alt="MARKETING">
+                </div>
+                <div class="work-info">
+                    <div class="work-category">E-Commerce</div>
+                    <div class="work-title">Minimalist Fashion Shop</div>
+                    <div class="work-desc">余白を贅沢に使った、高級アパレルブランドのECサイト。</div>
+                </div>
+            </div>
         </div>
-    </div>
+    </main>
 
-    <button class="btn" id="resetBtn" style="display: none;">Next Frame</button>
+    <!-- フッター -->
+    <footer>
+        <p>&copy; 2026 PRO.DESIGN. All rights reserved.</p>
+    </footer>
 
-    <div class="scoreboard-container">
-        <div class="scoreboard-header">
-            <div class="player-info">PLAYER 01</div>
-            <div class="total-score-display">TOTAL: <span id="totalScore">0</span></div>
-        </div>
-        <table class="score-table">
-            <thead>
-                <tr>
-                    <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
-                    <th>6</th><th>7</th><th>8</th><th>9</th><th>10</th>
-                </tr>
-            </thead>
-            <tbody id="scoreRow"></tbody>
-        </table>
-    </div>
-
-    <script>
-        const state = {
-            currentFrame: 1,
-            currentShot: 1,
-            scores: Array.from({length: 11}, () => []),
-            frameTotals: Array(11).fill(null),
-            pinsStatus: Array(10).fill(true),
-            isRolling: false,
-            gameOver: false
-        };
-
-        // ドラッグシステム用変数
-        let isDragging = false;
-        let startX = 0, startY = 0;
-        let currentX = 0, currentY = 0;
-        let lastMoveTime = 0;
-        let velocityY = 0; // 縦方向のドラッグ速度
-        let velocityX = 0; // 横方向のドラッグ速度
-
-        // 初期位置定義
-        const DEFAULT_BALL_BOTTOM = 40;
-        const DEFAULT_BALL_LEFT = 383;
-
-        const gameContainer = document.getElementById('gameContainer');
-        const ball = document.getElementById('ball');
-        const strikeAlert = document.getElementById('strikeAlert');
-        const resetBtn = document.getElementById('resetBtn');
-        const totalScoreDisplay = document.getElementById('totalScore');
-        const scoreRow = document.getElementById('scoreRow');
-
-        function initScoreboard() {
-            scoreRow.innerHTML = '';
-            for (let i = 1; i <= 10; i++) {
-                const td = document.createElement('td');
-                td.id = `f-${i}`;
-                if(i === 1) td.classList.add('current-frame-box');
-                
-                const numShots = i === 10 ? 3 : 2;
-                let shotsHtml = '<div class="shots">';
-                for(let s=1; s<=numShots; s++) {
-                    shotsHtml += `<div class="shot" id="f-${i}-s-${s}"></div>`;
-                }
-                shotsHtml += '</div>';
-                shotsHtml += `<div class="frame-total" id="f-${i}-total"></div>`;
-                
-                td.innerHTML = shotsHtml;
-                scoreRow.appendChild(td);
-            }
-        }
-
-        // --- ドラッグ（スワイプ）操作ロジック ---
-        
-        // マウス・タッチ開始
-        function handleStart(e) {
-            if (state.isRolling || state.gameOver) return;
-            isDragging = true;
-            
-            const pageX = e.pageX || e.touches[0].pageX;
-            const pageY = e.pageY || e.touches[0].pageY;
-            
-            startX = pageX;
-            startY = pageY;
-            currentX = ball.offsetLeft;
-            currentY = DEFAULT_BALL_BOTTOM;
-            lastMoveTime = performance.now();
-        }
-
-        // マウス・タッチ移動
-        function handleMove(e) {
-            if (!isDragging || state.isRolling) return;
-            
-            const pageX = e.pageX || e.touches[0].pageX;
-            const pageY = e.pageY || e.touches[0].pageY;
-            
-            const now = performance.now();
-            const dt = now - lastMoveTime;
-
-            const deltaX = pageX - startX;
-            const deltaY = pageY - startY;
-
-            // 速度の計算 (px / ms)
-            if (dt > 0) {
-                velocityX = deltaX / dt;
-                velocityY = deltaY / dt;
-            }
-
-            // ボールの位置をリアルタイム更新（移動範囲制限）
-            let newLeft = DEFAULT_BALL_LEFT + deltaX;
-            let newBottom = DEFAULT_BALL_BOTTOM - deltaY; // Yは画面下方向がプラスなのでマイナス
-
-            if (newLeft < 310) newLeft = 310;
-            if (newLeft > 460) newLeft = 460;
-            if (newBottom < 10) newBottom = 10;   // 引きすぎ防止
-            if (newBottom > 100) newBottom = 100; // 前に行きすぎ防止
-
-            ball.style.left = newLeft + 'px';
-            ball.style.bottom = newBottom + 'px';
-
-            startX = pageX;
-            startY = pageY;
-            lastMoveTime = now;
-        }
-
-        // マウス・タッチ終了（リリース）
-        function handleEnd() {
-            if (!isDragging || state.isRolling) return;
-            isDragging = false;
-
-            // 上方向（画面上。負のvelocityY）へ勢いよくスワイプされたか判定
-            if (velocityY < -0.2) {
-                rollBall(velocityX, velocityY);
-            } else {
-                // 勢いが足りない場合は手元に戻す
-                snapBack();
-            }
-        }
-
-        // イベント登録 (PC/スマホ両対応)
-        ball.addEventListener('mousedown', handleStart);
-        window.addEventListener('mousemove', handleMove);
-        window.addEventListener('mouseup', handleEnd);
-
-        ball.addEventListener('touchstart', handleStart);
-        window.addEventListener('touchmove', handleMove);
-        window.addEventListener('touchend', handleEnd);
-
-        // 手元に戻る演出
-        function snapBack() {
-            ball.style.transition = 'all 0.2s ease-out';
-            ball.style.left = DEFAULT_BALL_LEFT + 'px';
-            ball.style.bottom = DEFAULT_BALL_BOTTOM + 'px';
-            setTimeout(() => {
-                ball.style.transition = '';
-            }, 200);
-        }
-
-        // 投球アニメーション
-        function rollBall(vx, vy) {
-            state.isRolling = true;
-            
-            // 速度に応じたアニメーション時間の決定（早いほどすぐ届く）
-            const duration = Math.max(400, Math.min(1000, 150 / Math.abs(vy))); 
-            
-            // 横方向の慣性（フック・カーブの再現）
-            const finalLeft = ball.offsetLeft + (vx * duration * 0.5);
-
-            ball.style.transition = `bottom ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                                     left ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                                     transform ${duration}ms ease-in`;
-            
-            // 3D奥へ
-            ball.style.bottom = '350px';
-            ball.style.left = Math.max(310, Math.min(460, finalLeft)) + 'px';
-            ball.style.transform = 'scale(0.3)';
-            ball.style.boxShadow = '0 0 5px var(--neon-pink)';
-
-            setTimeout(() => {
-                calculateHit(ball.offsetLeft + 17);
-            }, duration - 50);
-        }
-
-        // ヒット判定
-        function calculateHit(finalBallX) {
-            const centerOffset = Math.abs(finalBallX - 385);
-            let hitCount = 0;
-            let currentPinsLeft = state.pinsStatus.filter(p => p).length;
-
-            state.pinsStatus.forEach((isStanding, index) => {
-                if (!isStanding) return;
-
-                let fallChance = 0.1;
-                if (centerOffset < 15) fallChance = 0.95; // ど真ん中
-                else if (centerOffset < 30) fallChance = 0.65;
-                else if (centerOffset < 50) fallChance = 0.35;
-
-                if (Math.random() < fallChance) {
-                    state.pinsStatus[index] = false;
-                    hitCount++;
-                    const pinEl = document.getElementById(`pin-${index + 1}`);
-                    const direction = Math.random() > 0.5 ? 'hit-left' : 'hit-right';
-                    pinEl.classList.add(direction);
-                }
-            });
-
-            if (hitCount === currentPinsLeft && state.currentShot === 1) showStrikeAlert("STRIKE!");
-            else if (hitCount === currentPinsLeft && state.currentShot === 2) showStrikeAlert("SPARE!");
-
-            recordScore(hitCount);
-        }
-
-        function showStrikeAlert(text) {
-            strikeAlert.innerText = text;
-            strikeAlert.classList.add('show');
-            setTimeout(() => strikeAlert.classList.remove('show'), 1200);
-        }
-
-        // スコア処理機構
-        function recordScore(count) {
-            const f = state.currentFrame;
-            const s = state.currentShot;
-            state.scores[f].push(count);
-
-            let displayChar = count.toString();
-            if (count === 0) displayChar = '-';
-            
-            if (f < 10) {
-                if (s === 1 && count === 10) {
-                    displayChar = 'X';
-                    document.getElementById(`f-${f}-s-2`).innerText = '';
-                    advanceFrame();
-                    return;
-                } else if (s === 2 && (state.scores[f][0] + state.scores[f][1] === 10)) {
-                    displayChar = '/';
-                }
-            } else {
-                if (count === 10) displayChar = 'X';
-                else if (s > 1 && (state.scores[f][s-1] + state.scores[f][s-2] === 10) && state.scores[f][s-2] !== 10) displayChar = '/';
-            }
-
-            document.getElementById(`f-${f}-s-${s}`).innerText = displayChar;
-
-            if (f < 10) {
-                if (s === 1) {
-                    state.currentShot = 2;
-                    setTimeout(() => { resetBallOnly(); }, 1000);
-                } else {
-                    advanceFrame();
-                }
-            } else {
-                if (s === 1) {
-                    state.currentShot = 2;
-                    if(count === 10) resetPinsGraphic();
-                    setTimeout(() => { resetBallOnly(); }, 1000);
-                } else if (s === 2) {
-                    const total10th = state.scores[10][0] + state.scores[10][1];
-                    if (total10th >= 10) {
-                        state.currentShot = 3;
-                        if(count === 10 || total10th === 10) resetPinsGraphic();
-                        setTimeout(() => { resetBallOnly(); }, 1000);
-                    } else {
-                        endGame();
-                    }
-                } else {
-                    endGame();
-                }
-            }
-            updateTotalScores();
-        }
-
-        function advanceFrame() {
-            updateTotalScores();
-            setTimeout(() => {
-                document.getElementById(`f-${state.currentFrame}`).classList.remove('current-frame-box');
-                state.currentFrame++;
-                if (state.currentFrame > 10) {
-                    endGame();
-                } else {
-                    document.getElementById(`f-${state.currentFrame}`).classList.add('current-frame-box');
-                    state.currentShot = 1;
-                    resetPinsGraphic();
-                    resetBallOnly();
-                }
-            }, 1000);
-        }
-
-        function resetBallOnly() {
-            ball.style.transition = '';
-            ball.style.bottom = DEFAULT_BALL_BOTTOM + 'px';
-            ball.style.left = DEFAULT_BALL_LEFT + 'px';
-            ball.style.transform = 'scale(1)';
-            ball.style.boxShadow = '0 0 15px var(--neon-pink), inset -3px -3px 10px rgba(0,0,0,0.8)';
-            state.isRolling = false;
-        }
-
-        function resetPinsGraphic() {
-            state.pinsStatus.fill(true);
-            for (let i = 1; i <= 10; i++) {
-                const p = document.getElementById(`pin-${i}`);
-                p.classList.remove('hit-left', 'hit-right');
-            }
-        }
-
-        function updateTotalScores() {
-            let runningTotal = 0;
-            for (let i = 1; i <= 10; i++) {
-                const frameShots = state.scores[i];
-                if (!frameShots || frameShots.length === 0) break;
-
-                if (i < 10) {
-                    if (frameShots[0] === 10) {
-                        const next1 = state.scores[i+1]?.[0];
-                        let next2 = state.scores[i+1]?.[1];
-                        if (next1 === 10 && i < 9) next2 = state.scores[i+2]?.[0];
-                        
-                        if (next1 !== undefined && next2 !== undefined) {
-                            runningTotal += 10 + next1 + next2;
-                            state.frameTotals[i] = runningTotal;
-                        } else { state.frameTotals[i] = null; }
-                    } else if (frameShots[0] + frameShots[1] === 10) {
-                        const next1 = state.scores[i+1]?.[0];
-                        if (next1 !== undefined) {
-                            runningTotal += 10 + next1;
-                            state.frameTotals[i] = runningTotal;
-                        } else { state.frameTotals[i] = null; }
-                    } else {
-                        if (frameShots[1] !== undefined) {
-                            runningTotal += frameShots[0] + frameShots[1];
-                            state.frameTotals[i] = runningTotal;
-                        }
-                    }
-                } else {
-                    if (frameShots.length >= 2 && (frameShots[0]+frameShots[1] < 10)) {
-                        runningTotal += frameShots[0] + frameShots[1];
-                        state.frameTotals[i] = runningTotal;
-                    } else if (frameShots.length === 3) {
-                        runningTotal += frameShots[0] + frameShots[1] + frameShots[2];
-                        state.frameTotals[i] = runningTotal;
-                    }
-                }
-
-                if (state.frameTotals[i] !== null) {
-                    document.getElementById(`f-${i}-total`).innerText = state.frameTotals[i];
-                    totalScoreDisplay.innerText = state.frameTotals[i];
-                }
-            }
-        }
-
-        function endGame() {
-            state.gameOver = true;
-            updateTotalScores();
-            alert(`GAME OVER! TOTAL SCORE: ${totalScoreDisplay.innerText}`);
-            resetBtn.innerText = "RESTART GAME";
-            resetBtn.style.display = 'block';
-        }
-
-        resetBtn.addEventListener('click', () => {
-            if (state.gameOver) {
-                state.currentFrame = 1;
-                state.currentShot = 1;
-                state.scores = Array.from({length: 11}, () => []);
-                state.frameTotals.fill(null);
-                state.gameOver = false;
-                totalScoreDisplay.innerText = '0';
-                initScoreboard();
-                resetBtn.style.display = 'none';
-            }
-            resetPinsGraphic();
-            resetBallOnly();
-        });
-
-        initScoreboard();
-    </script>
 </body>
 </html>
