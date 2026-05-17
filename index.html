@@ -1,0 +1,147 @@
+export default function CasinoLandingPage() {
+  const games = [
+    {
+      title: "Candy Slots",
+      description: "Colorful spinning fun with sweet jackpot vibes.",
+      emoji: "🍭",
+    },
+    {
+      title: "Party Blackjack",
+      description: "Bright lights, fun cards, and playful energy.",
+      emoji: "🎉",
+    },
+    {
+      title: "Rainbow Roulette",
+      description: "Spin the rainbow wheel and chase lucky stars.",
+      emoji: "🌈",
+    },
+  ];
+
+  return (
+    <div className="min-h-screen overflow-hidden bg-gradient-to-br from-pink-300 via-yellow-200 to-cyan-200 text-gray-800">
+      <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top_left,white,transparent_30%),radial-gradient(circle_at_bottom_right,white,transparent_30%)]" />
+
+      <header className="relative z-10 flex items-center justify-between px-8 py-6">
+        <h1 className="text-4xl font-black tracking-wide text-pink-600 drop-shadow-md">
+          POP JACKPOT
+        </h1>
+
+        <nav className="hidden md:flex gap-8 font-bold text-pink-700">
+          <a href="#games" className="hover:scale-110 transition-transform">
+            Games
+          </a>
+          <a href="#bonus" className="hover:scale-110 transition-transform">
+            Bonus
+          </a>
+          <a href="#about" className="hover:scale-110 transition-transform">
+            About
+          </a>
+        </nav>
+
+        <button className="rounded-full bg-pink-500 px-6 py-3 text-white font-bold shadow-lg hover:scale-110 transition-transform">
+          START
+        </button>
+      </header>
+
+      <main className="relative z-10">
+        <section className="px-8 pt-20 pb-24 text-center max-w-6xl mx-auto">
+          <div className="inline-block rounded-full bg-white/70 px-6 py-2 text-pink-600 font-bold shadow-md mb-8">
+            ✨ POP & FUN CASINO STYLE ✨
+          </div>
+
+          <h2 className="text-6xl md:text-8xl font-black leading-none">
+            HAPPY
+            <span className="block text-pink-500 rotate-[-2deg]">
+              JACKPOT!
+            </span>
+          </h2>
+
+          <p className="max-w-2xl mx-auto mt-8 text-lg md:text-2xl font-medium text-pink-800 leading-relaxed">
+            Cute colors, playful animations, and exciting mini-game inspired
+            visuals for a super fun casino-style landing page.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-5 mt-12">
+            <button className="rounded-full bg-yellow-300 px-10 py-5 text-xl font-black shadow-xl hover:rotate-2 hover:scale-110 transition-transform">
+              PLAY NOW 🎰
+            </button>
+
+            <button className="rounded-full bg-white/80 backdrop-blur px-10 py-5 text-xl font-bold shadow-lg hover:scale-105 transition-transform">
+              VIEW GAMES 🎮
+            </button>
+          </div>
+        </section>
+
+        <section
+          id="games"
+          className="grid gap-8 px-8 pb-24 md:grid-cols-3 max-w-6xl mx-auto"
+        >
+          {games.map((game) => (
+            <div
+              key={game.title}
+              className="rounded-[2rem] bg-white/70 backdrop-blur-xl p-8 shadow-2xl border-4 border-white hover:-translate-y-3 hover:rotate-1 transition-transform"
+            >
+              <div className="text-7xl mb-6 animate-bounce">{game.emoji}</div>
+
+              <h3 className="text-3xl font-black text-pink-600">
+                {game.title}
+              </h3>
+
+              <p className="mt-4 text-lg text-gray-700 leading-relaxed">
+                {game.description}
+              </p>
+
+              <button className="mt-8 w-full rounded-full bg-pink-500 py-4 text-lg font-black text-white shadow-lg hover:bg-pink-400 transition">
+                LET'S GO!
+              </button>
+            </div>
+          ))}
+        </section>
+
+        <section
+          id="bonus"
+          className="mx-8 mb-24 rounded-[3rem] bg-white/60 p-10 shadow-2xl backdrop-blur-xl max-w-6xl xl:mx-auto"
+        >
+          <div className="grid lg:grid-cols-2 gap-10 items-center">
+            <div>
+              <div className="text-yellow-500 text-xl font-black mb-4">
+                🌟 DAILY BONUS 🌟
+              </div>
+
+              <h3 className="text-5xl font-black text-pink-600 leading-tight">
+                Lucky Pop Rewards
+              </h3>
+
+              <p className="mt-6 text-lg text-gray-700 leading-relaxed">
+                Collect stars, unlock bonus gifts, and enjoy a cheerful colorful
+                gaming atmosphere with playful UI elements.
+              </p>
+            </div>
+
+            <div className="grid gap-4">
+              <div className="rounded-3xl bg-pink-400 text-white p-6 text-2xl font-black shadow-lg">
+                🎁 Free Bonus Spins
+              </div>
+
+              <div className="rounded-3xl bg-yellow-300 p-6 text-2xl font-black shadow-lg">
+                🌈 Rainbow Jackpot
+              </div>
+
+              <div className="rounded-3xl bg-cyan-300 p-6 text-2xl font-black shadow-lg">
+                ⭐ VIP Candy Club
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer
+        id="about"
+        className="relative z-10 py-10 text-center font-bold text-pink-700"
+      >
+        © 2026 POP JACKPOT — Fun Demo Landing Page
+      </footer>
+    </div>
+  );
+}
+
