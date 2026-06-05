@@ -2,122 +2,179 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Perfect Oppai Brush</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Oppai Brush Test</title>
     <style>
-        * {
-            box-sizing: border-box;
+        html, body {
             margin: 0;
             padding: 0;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        body {
-            background-color: #fff3f5;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            overflow: hidden;
-            touch-action: none; /* スマホのスクロールを完全に禁止 */
-        }
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
+            overflow: hidden;
+            background-color: #fff3f5;
+            touch-action: none; /* スマホのスクロールを強制拒否 */
+        }
+        canvas {
             display: block;
+            width: 100%;
+            height: 100%;
             cursor: crosshair;
         }
-        .info {
+        .msg {
             position: absolute;
-            top: 20px;
+            top: 15px;
             width: 100%;
             text-align: center;
             color: #ff5e7e;
+            font-family: sans-serif;
             font-weight: bold;
             pointer-events: none;
-            font-size: 16px;
-            text-shadow: 1px 1px 0 #fff;
-            z-index: 10;
         }
     </style>
 </head>
 <body>
 
-    <div class="info">画面をマウスでドラッグ、またはスマホでなぞって離してみてね</div>
+    <div class="msg">テスト：画面を適当になぞって指を離してみてね</div>
     <canvas id="canvas"></canvas>
 
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
 
-        // キャンバスのサイズを画面にフィットさせる
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
+        // 画面サイズにキャンバスを合わせる
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
         let isDrawing = false;
-        let currentStroke = [];
-        let completedOppais = [];
+        let points = [];
+        let shapes = [];
 
-        // 物理アニメーション設定（ぷるぷる感）
-        const SPRING = 0.18;
-        const FRICTION = 0.80;
-
-        // --- マウスイベント (PC用) ---
+        // --- マウス操作 ---
         canvas.addEventListener('mousedown', (e) => {
             isDrawing = true;
-            currentStroke = [{ x: e.clientX, y: e.clientY }];
+            points = [{ x: e.clientX, y: e.clientY }];
         });
-
         canvas.addEventListener('mousemove', (e) => {
             if (!isDrawing) return;
-            currentStroke.push({ x: e.clientX, y: e.clientY });
+            points.push({ x: e.clientX, y: e.clientY });
         });
-
         window.addEventListener('mouseup', () => {
-            endDrawing();
+            if (isDrawing) endStroke();
         });
 
-        // --- タッチイベント (スマホ・タブレット用) ---
-        canvas.addEventListener('touchstart', (e) => {
+        // --- スマホタッチ操作（最も原始的で確実な書き方） ---
+        canvas.ontouchstart = function(e) {
             isDrawing = true;
-            const touch = e.touches[0];
-            currentStroke = [{ x: touch.clientX, y: touch.clientY }];
-        }, { passive: false });
-
-        canvas.addEventListener('touchmove', (e) => {
+            const t = e.touches[0];
+            points = [{ x: t.clientX, y: t.clientY }];
+        };
+        canvas.ontouchmove = function(e) {
             if (!isDrawing) return;
-            const touch = e.touches[0];
-            currentStroke.push({ x: touch.clientX, y: touch.clientY });
-            e.preventDefault(); // スクロール等の標準動作を確実にストップ
-        }, { passive: false });
+            const t = e.touches[0];
+            points.push({ x: t.clientX, y: t.clientY });
+            e.preventDefault();
+        };
+        canvas.ontouchend = function() {
+            if (isDrawing) endStroke();
+        };
 
-        window.addEventListener('touchend', () => {
-            endDrawing();
-        });
-
-        // --- 描き終わり・おっぱい変換処理 ---
-        function endDrawing() {
-            if (!isDrawing) return;
+        // --- 離した時の処理 ---
+        function endStroke() {
             isDrawing = false;
+            if (points.length < 2) return;
 
-            if (currentStroke.length > 2) {
-                const startPt = currentStroke[0];
-                const endPt = currentStroke[currentStroke.length - 1];
-                
-                const dx = endPt.x - startPt.x;
-                const dy = endPt.y - startPt.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
+            const p1 = points[0];
+            const p2 = points[points.length - 1];
 
-                // 少しでも線を引いたらおっぱいを生成
-                if (distance > 15) {
-                    const angle = Math.atan2(dy, dx);
-                    
-                    // 引いた線の左側に膨らむベクトル
-                    const nx = Math.cos(angle - Math.PI / 2);
-                    const ny = Math.sin(angle - Math.PI / 2);
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
 
-                    completedOppais.
+            if (dist > 10) {
+                const angle = Math.atan2(dy, dx);
+                const nx = Math.cos(angle - Math.PI / 2);
+                const ny = Math.sin(angle - Math.PI / 2);
+
+                // 新しいおっぱいデータを登録
+                shapes.push({
+                    x1: p1.x, y1: p1.y,
+                    x2: p2.x, y2: p2.y,
+                    nx: nx, ny: ny,
+                    angle: angle,
+                    len: dist,
+                    t: 0 // アニメーション用タイマー
+                });
+            }
+            points = [];
+        }
+
+        // --- ループ描画 ---
+        function draw() {
+            // 背景クリア
+            ctx.fillStyle = '#fff3f5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 1. 引いてる最中の線
+            if (isDrawing && points.length > 1) {
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++) {
+                    ctx.lineTo(points[i].x, points[i].y);
+                }
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = '#ffb3c1';
+                ctx.stroke();
+            }
+
+            // 2. 確定したおっぱいシルエット
+            for (let i = shapes.length - 1; i >= 0; i--) {
+                const s = shapes[i];
+                s.t += 0.1; // タイマーを進める
+
+                // 物理演算ではなく、一番確実なサイン波によるぷるぷる
+                const pulse = Math.sin(s.t * 4) * Math.exp(-s.t * 0.3); 
+                const scale = 1.0 + pulse * 0.3; // 1.0を基準に揺れる
+
+                // 一定時間で消す
+                if (s.t > 8) {
+                    shapes.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.lineWidth = 5;
+                ctx.strokeStyle = '#222222';
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                const h = s.len * 0.55 * Math.max(0, scale);
+
+                // シルエット計算
+                const cp1x = s.x1 + (s.x2 - s.x1) * 0.3 + s.nx * (h * 0.35);
+                const cp1y = s.y1 + (s.y2 - s.y1) * 0.3 + s.ny * (h * 0.35);
+
+                const nipX = s.x1 + (s.x2 - s.x1) * 0.55 + s.nx * h;
+                const nipY = s.x1 + (s.x2 - s.x1) * 0.55 + s.ny * h;
+
+                const cp2x = s.x1 + (s.x2 - s.x1) * 0.8 + s.nx * (h * 0.65);
+                const cp2y = s.y1 + (s.y2 - s.y1) * 0.8 + s.ny * (h * 0.65);
+
+                ctx.beginPath();
+                ctx.moveTo(s.x1, s.y1);
+                ctx.quadraticCurveTo(cp1x, cp1y, nipX - (s.x2 - s.x1) * 0.02, nipY - (s.y2 - s.y1) * 0.02);
+
+                const nipRadius = s.len * 0.04;
+                ctx.arc(nipX, nipY, nipRadius, s.angle - Math.PI * 0.7, s.angle + Math.PI * 0.4);
+
+                ctx.quadraticCurveTo(cp2x, cp2y, s.x2, s.y2);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        draw();
+    </script>
+</body>
+</html>
