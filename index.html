@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oppai Penint Clone</title>
+    <title>Perfect Oppai Penint</title>
     <style>
         * {
             box-sizing: border-box;
@@ -12,7 +12,7 @@
             user-select: none;
         }
         body {
-            background-color: #fff0f2;
+            background-color: #fff3f5;
             font-family: 'Helvetica Neue', Arial, sans-serif;
             overflow: hidden;
         }
@@ -29,17 +29,18 @@
             top: 20px;
             width: 100%;
             text-align: center;
-            color: #ff8fa3;
+            color: #ff5e7e;
             font-weight: bold;
             pointer-events: none;
-            font-size: 18px;
+            font-size: 16px;
             text-shadow: 1px 1px 0 #fff;
+            opacity: 0.8;
         }
     </style>
 </head>
 <body>
 
-    <div class="info">画面に線を引いて、パッと離してみてね</div>
+    <div class="info">画面をドラッグして線を引くと、あのシルエットがぷるんっと現れます</div>
     <canvas id="canvas"></canvas>
 
     <script>
@@ -57,11 +58,11 @@
         let currentStroke = [];
         let completedOppais = [];
 
-        // アニメーション用の設定パラメータ
-        const SPRING = 0.15;    // バネの強さ（ぷるぷる感）
-        const FRICTION = 0.82;  // 摩擦（どれくらいで揺れが収まるか）
+        // ぷるぷるアニメーションの物理パラメータ
+        const SPRING = 0.18;    // バネの強さ（揺れの速さ）
+        const FRICTION = 0.80;  // 摩擦（おさまりの良さ）
 
-        // マウス & タッチイベント
+        // マウス ＆ タッチイベント登録
         canvas.addEventListener('mousedown', start);
         canvas.addEventListener('mousemove', move);
         window.addEventListener('mouseup', end);
@@ -84,148 +85,98 @@
             if (!isDrawing) return;
             isDrawing = false;
 
-            if (currentStroke.length > 5) {
-                // 始点と終点を取得
+            if (currentStroke.length > 3) {
                 const startPt = currentStroke[0];
                 const endPt = currentStroke[currentStroke.length - 1];
                 
-                // 線の長さ（幅）を計算
                 const dx = endPt.x - startPt.x;
                 const dy = endPt.y - startPt.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
-                // ある程度の長さがあればおっぱいに変換
-                if (distance > 20) {
-                    const midX = (startPt.x + endPt.x) / 2;
-                    const midY = (startPt.y + endPt.y) / 2;
+                // 一定以上の長さで引いたら生成
+                if (distance > 30) {
                     const angle = Math.atan2(dy, dx);
-
-                    // 描いた線の「膨らみ」の平均的な向きを簡易計算（本家風に上または横に膨らむ）
-                    // 進行方向の左側に膨らませる
+                    
+                    // 線の進行方向の「左側」に膨らむようベクトルを計算
                     const nx = Math.cos(angle - Math.PI / 2);
                     const ny = Math.sin(angle - Math.PI / 2);
-
-                    // 目標となるおっぱいの高さ（線の長さに比例）
-                    const targetHeight = distance * 0.4;
 
                     completedOppais.push({
                         x1: startPt.x, y1: startPt.y,
                         x2: endPt.x, y2: endPt.y,
-                        midX: midX, midY: midY,
                         nx: nx, ny: ny,
                         angle: angle,
                         length: distance,
                         
                         // アニメーション用変数
-                        height: 0,          // 現在の高さ（0からスタート）
-                        targetHeight: targetHeight,
-                        velocity: 0,        // 物理演算の速度
-                        opacity: 1,
-                        life: 1.0           // 徐々に消える演出用（不要なら消してOK）
+                        scale: 0,          // 登場時はサイズ0から
+                        targetScale: 1.0,  // 目標サイズ
+                        velocity: 0,
+                        life: 1.0          // 余韻を残して消えるライフ
                     });
                 }
             }
             currentStroke = [];
         }
 
-        // メインアニメーションループ
+        // メインループ
         function loop() {
-            // 画面クリア（淡いピンク背景）
-            ctx.fillStyle = '#fff0f2';
+            // 背景クリア
+            ctx.fillStyle = '#fff3f5';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // 1. 現在描いている途中の生々しい線を描画
+            // 1. 描いている最中の線
             if (isDrawing && currentStroke.length > 1) {
                 ctx.beginPath();
                 ctx.moveTo(currentStroke[0].x, currentStroke[0].y);
                 for (let i = 1; i < currentStroke.length; i++) {
                     ctx.lineTo(currentStroke[i].x, currentStroke[i].y);
                 }
-                ctx.lineWidth = 5;
+                ctx.lineWidth = 4;
                 ctx.strokeStyle = '#ffb3c1';
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
                 ctx.stroke();
             }
 
-            // 2. 描き終わったおっぱいたちの物理演算＆描画
+            // 2. 確定したおっぱいシルエットの計算と描画
             for (let i = completedOppais.length - 1; i >= 0; i--) {
                 const op = completedOppais[i];
 
-                // フックの法則（バネ運動）で「ぷるんぷるん」を計算
-                const acceleration = (op.targetHeight - op.height) * SPRING;
+                // 物理演算（ぷるんぷるん揺れる動き）
+                const acceleration = (op.targetScale - op.scale) * SPRING;
                 op.velocity += acceleration;
                 op.velocity *= FRICTION;
-                op.height += op.velocity;
+                op.scale += op.velocity;
 
-                // 時間経過でちょっとずつ薄くして消す（本家風の余韻）
-                op.life -= 0.002; 
+                // 時間経過で消滅
+                op.life -= 0.003;
                 if (op.life <= 0) {
                     completedOppais.splice(i, 1);
                     continue;
                 }
 
-                // 描画設定
                 ctx.save();
-                ctx.globalAlpha = Math.min(1, op.life * 5); // 消え際だけフェードアウト
-                ctx.lineWidth = 6;
-                ctx.strokeStyle = '#ff758f';
-                ctx.fillStyle = '#ff758f';
+                ctx.globalAlpha = Math.min(1, op.life * 5);
+                ctx.lineWidth = 5;
+                ctx.strokeStyle = '#333333'; // 画像のような綺麗な黒い線画に
                 ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
 
-                // おっぱいの山の頂点を計算
-                const hx = op.midX + op.nx * op.height;
-                const hy = op.midY + op.ny * op.height;
+                // 画像のシルエットを再現するための3つの重要制御点
+                const currentLength = op.length * op.scale;
+                const h = currentLength * 0.55; // おっぱいの高さ
 
-                // 左の乳房の山
-                const leftMidX = op.x1 + (hx - op.x1) * 0.6;
-                const leftMidY = op.y1 + (hy - op.y1) * 0.6;
-                // 右の乳房の山
-                const rightMidX = op.x2 + (hx - op.x2) * 0.6;
-                const rightMidY = op.y2 + (hy - op.y2) * 0.6;
+                // 1. 上部のスロープ（なだらかな坂）
+                const cp1x = op.x1 + (op.x2 - op.x1) * 0.3 + op.nx * (h * 0.4);
+                const cp1y = op.y1 + (op.y2 - op.y1) * 0.3 + op.ny * (h * 0.4);
 
-                // 制御点の計算（綺麗なふくらみを作るため）
-                const cpLeftX = leftMidX + op.nx * (op.height * 0.3);
-                const cpLeftY = leftMidY + op.ny * (op.height * 0.3);
-                const cpRightX = rightMidX + op.nx * (op.height * 0.3);
-                const cpRightY = rightMidY + op.ny * (op.height * 0.3);
+                // 2. 乳首の先端（ツンとした突起）の位置
+                const nipX = op.x1 + (op.x2 - op.x1) * 0.55 + op.nx * h;
+                const nipY = op.y1 + (op.y2 - op.y1) * 0.55 + op.ny * h;
 
-                // --- 輪郭の描画 ---
-                ctx.beginPath();
-                ctx.moveTo(op.x1, op.y1);
-                // 左のふくらみ
-                ctx.quadraticCurveTo(cpLeftX, cpLeftY, hx, hy);
-                // 右のふくらみ
-                ctx.quadraticCurveTo(cpRightX, cpRightY, op.x2, op.y2);
-                ctx.stroke();
+                // 3. 下部のふくらみ（豊かな丸み）
+                const cp2x = op.x1 + (op.x2 - op.x1) * 0.8 + op.nx * (h * 0.6);
+                const cp2y = op.y1 + (op.y2 - op.y1) * 0.8 + op.ny * (h * 0.6);
 
-                // --- 乳首（ちくび）の描画 ---
-                // ぷるぷるに合わせて乳首の位置も動く
-                ctx.fillStyle = '#ffb3c1';
-                const nipRadius = Math.max(3, op.length * 0.03); // 線の長さに合わせてサイズ変更
-
-                // 左乳首
-                const nipLeftX = op.x1 + (hx - op.x1) * 0.65;
-                const nipLeftY = op.y1 + (hy - op.y1) * 0.65;
-                ctx.beginPath();
-                ctx.arc(nipLeftX, nipLeftY, nipRadius, 0, Math.PI * 2);
-                ctx.fill();
-
-                // 右乳首
-                const nipRightX = op.x2 + (hx - op.x2) * 0.65;
-                const nipRightY = op.y2 + (hy - op.y2) * 0.65;
-                ctx.beginPath();
-                ctx.arc(nipRightX, nipRightY, nipRadius, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.restore();
-            }
-
-            requestAnimationFrame(loop);
-        }
-
-        // アニメーション開始
-        loop();
-    </script>
-</body>
-</html>
+                // --- シルエットの描画 ---
